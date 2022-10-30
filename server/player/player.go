@@ -1,7 +1,7 @@
 package player
 
 type Player struct {
-	ID uint32
+	ID uint32 `json:"id"`
 }
 
 func NewPlayer(id uint32) *Player {

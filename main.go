@@ -9,6 +9,8 @@ import (
 func bootstrap() *server.App {
 	app := server.NewApp()
 	app.AddTCPProc(tcpproc.Login)
+	app.AddTCPProc(tcpproc.LobbyList)
+	app.AddTCPProc(tcpproc.CreateLobby)
 	return app
 }
 

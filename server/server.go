@@ -32,19 +32,22 @@ func NewApp() *App {
 }
 
 func (app *App) HandleTcpProc(conn *net.Conn) {
-	ctx := TCPContext{app, conn, make([]byte, 1024)}
-	n, err := (*conn).Read(ctx.Data)
-	if err != nil {
-		fmt.Println("failed to read TCP msg because of ", err.Error())
-		return
+	for {
+		ctx := TCPContext{app, conn, make([]byte, 1024)}
+		_, err := (*conn).Read(ctx.Data)
+		if err != nil {
+			if err.Error() == "EOF" {
+				continue
+			}
+			fmt.Println("failed to read TCP msg because of ", err.Error())
+			return
+		}
+		procId := ctx.Data[0]
+		if !(procId <= app.tcpProcNum) {
+			return
+		}
+		app.tcpProcs[procId](ctx)
 	}
-	procId := ctx.Data[0]
-	if !(procId <= app.tcpProcNum) {
-		return
-	}
-	app.tcpProcs[procId](ctx)
-	fmt.Println(n)
-	fmt.Printf("%d", ctx.Data[0])
 }
 
 func (app *App) HandleUdpProc(conn *net.UDPConn) {
@@ -95,7 +98,6 @@ func (app *App) Start() {
 			continue
 		}
 		go app.HandleTcpProc(&conn)
-
 	}
 }
 
