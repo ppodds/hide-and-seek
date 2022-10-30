@@ -4,12 +4,20 @@ namespace IO.Net
 {
     public class GameUdpClient
     {
+        private readonly string _host;
+        private readonly int _port;
         private readonly UdpClient _udpClient;
 
         public GameUdpClient(string host, int port)
         {
             _udpClient = new UdpClient();
-            _udpClient.Connect(host, port);
+            _host = host;
+            _port = port;
+        }
+
+        public void Login()
+        {
+            _udpClient.Connect(_host, _port);
         }
     }
 }

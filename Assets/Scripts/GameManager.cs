@@ -27,17 +27,17 @@ public class GameManager : MonoBehaviour
 
     public async Task<bool> ConnectToServer(string host, int tcpPort, int udpPort)
     {
+        GameTcpClient = new GameTcpClient(host, tcpPort);
+        GameUdpClient = new GameUdpClient(host, udpPort);
         try
         {
-            GameTcpClient = new GameTcpClient(host, tcpPort);
-            GameUdpClient = new GameUdpClient(host, udpPort);
+            ID = await GameTcpClient.Login();
         }
         catch (SocketException e)
         {
             return false;
         }
 
-        ID = await GameTcpClient.Login();
         return true;
     }
 }

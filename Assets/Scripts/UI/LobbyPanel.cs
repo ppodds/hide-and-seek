@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Server;
+using UnityEngine;
 
 namespace UI
 {
@@ -6,6 +7,7 @@ namespace UI
     {
         [SerializeField] private Transform lobbyListTransform;
         [SerializeField] private GameObject lobbyItem;
+        [SerializeField] private GameObject prepareRoom;
 
         private void OnEnable()
         {
@@ -14,9 +16,10 @@ namespace UI
             {
                 foreach (var lobby in task.Result)
                 {
-                    var t = Instantiate(lobbyItem, lobbyListTransform);
-                    t.GetComponent<LobbyItem>()
-                        .SetText(lobby.Value.Lead, lobby.Value.CurrentPeople, lobby.Value.MaxPeople);
+                    var t = Instantiate(lobbyItem, lobbyListTransform).GetComponent<LobbyItem>();
+                    t.Lobby = lobby.Value;
+                    t.LobbyPanel = this;
+                    t.UpdateText();
                 }
 
                 Debug.Log("Load lobbies success");
@@ -31,18 +34,26 @@ namespace UI
         public void CreateLobby()
         {
             var task = GameManager.Instance.GameTcpClient.CreateLobby();
-            Debug.Log("t");
             task.GetAwaiter().OnCompleted(() =>
             {
-                Debug.Log("t2");
                 if (task.Result == null)
                 {
                     Debug.Log("Create lobby failed");
                     return;
                 }
 
+                ShowPrepareRoom(task.Result);
                 Debug.Log("Create lobby success");
             });
+        }
+
+        public void ShowPrepareRoom(Lobby lobby)
+        {
+            prepareRoom.SetActive(true);
+            var t = prepareRoom.GetComponent<PrepareRoom>();
+            t.Lobby = lobby;
+            t.UpdatePrepareRoom();
+            gameObject.SetActive(false);
         }
     }
 }

@@ -9,10 +9,28 @@ namespace UI
         [SerializeField] private TMP_Text lead;
         [SerializeField] private TMP_Text people;
 
-        public void SetText(OnlinePlayer leadPlayer, uint curPeople, uint maxPeople)
+        public LobbyPanel LobbyPanel { get; set; }
+        public Lobby Lobby { get; set; }
+
+        public void UpdateText()
         {
-            lead.SetText("Lead: " + leadPlayer.ID);
-            people.SetText(curPeople + " / " + maxPeople);
+            lead.SetText("Lead: " + Lobby.Lead.ID);
+            people.SetText(Lobby.CurrentPeople + " / " + Lobby.MaxPeople);
+        }
+
+        public void JoinRoom()
+        {
+            var task = GameManager.Instance.GameTcpClient.JoinLobby(Lobby.ID);
+            task.GetAwaiter().OnCompleted(() =>
+            {
+                if (task.Result == null)
+                {
+                    Debug.Log("Join failed");
+                    return;
+                }
+
+                LobbyPanel.ShowPrepareRoom(task.Result);
+            });
         }
     }
 }
