@@ -7,7 +7,7 @@ import (
 )
 
 func Login(ctx server.TCPContext) {
-	player := ctx.App.Players.AddPlayer()
+	player := ctx.App.Players.AddPlayer(ctx.Conn)
 	buf := make([]byte, 4)
 	binary.LittleEndian.PutUint32(buf, player.ID)
 	_, err := (*ctx.Conn).Write(buf)

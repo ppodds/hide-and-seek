@@ -31,3 +31,15 @@ func (lobbies *Lobbies) Lobbies() map[uint32]*Lobby {
 	defer lobbies.RUnlock()
 	return lobbies.lobbies
 }
+
+// RmLobby remove the lobby from lobbies. Return true if success, else false.
+func (lobbies *Lobbies) RmLobby(id uint32) bool {
+	lobbies.Lock()
+	_, ok := lobbies.lobbies[id]
+	if !ok {
+		return false
+	}
+	delete(lobbies.lobbies, id)
+	lobbies.Unlock()
+	return true
+}

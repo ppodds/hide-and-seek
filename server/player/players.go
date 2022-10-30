@@ -1,6 +1,7 @@
 package player
 
 import (
+	"net"
 	"sync"
 )
 
@@ -16,9 +17,9 @@ func NewPlayers() *Players {
 	return players
 }
 
-func (players *Players) AddPlayer() *Player {
+func (players *Players) AddPlayer(conn *net.Conn) *Player {
 	players.Lock()
-	player := NewPlayer(players.curID)
+	player := NewPlayer(players.curID, conn)
 	players.players[player.ID] = player
 	players.curID++
 	players.Unlock()
