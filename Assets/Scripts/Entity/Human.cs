@@ -1,5 +1,4 @@
-﻿using IO;
-using SUPERCharacter;
+﻿using SUPERCharacter;
 using UnityEngine;
 
 namespace Entity
@@ -7,12 +6,12 @@ namespace Entity
     [RequireComponent(typeof(Animator), typeof(Rigidbody), typeof(SUPERCharacterAIO))]
     public class Human : MonoBehaviour
     {
-        private Rigidbody _rigidbody;
-        private Animator _animator;
-        private SUPERCharacterAIO _superCharacterAio;
         private static readonly int Velocity = Animator.StringToHash("velocity");
         private static readonly int Idle = Animator.StringToHash("idle");
         private static readonly int Running = Animator.StringToHash("running");
+        private Animator _animator;
+        private Rigidbody _rigidbody;
+        private SUPERCharacterAIO _superCharacterAio;
 
         private void Awake()
         {
@@ -33,6 +32,7 @@ namespace Entity
                 _animator.SetFloat(Velocity, 0);
                 _animator.SetBool(Idle, true);
             }
+
             _animator.SetBool(Running, _superCharacterAio.isSprinting);
         }
     }

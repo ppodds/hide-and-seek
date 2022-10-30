@@ -1,7 +1,5 @@
-﻿using System;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Threading.Tasks;
-using IO;
 using IO.Net;
 using UnityEngine;
 
@@ -26,7 +24,7 @@ public class GameManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-    
+
     public async Task<bool> ConnectToServer(string host, int tcpPort, int udpPort)
     {
         try

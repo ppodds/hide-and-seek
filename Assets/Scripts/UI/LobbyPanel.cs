@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace UI
 {
@@ -26,10 +25,7 @@ namespace UI
 
         private void OnDisable()
         {
-            for (var i = 0; i < lobbyListTransform.childCount; i++)
-            {
-                Destroy(lobbyListTransform.GetChild(i).gameObject);
-            }
+            for (var i = 0; i < lobbyListTransform.childCount; i++) Destroy(lobbyListTransform.GetChild(i).gameObject);
         }
 
         public void CreateLobby()

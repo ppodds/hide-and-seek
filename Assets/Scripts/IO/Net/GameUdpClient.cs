@@ -1,13 +1,10 @@
-﻿using System;
-using System.Net.Sockets;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using System.Net.Sockets;
 
 namespace IO.Net
 {
     public class GameUdpClient
     {
-        private UdpClient _udpClient;
+        private readonly UdpClient _udpClient;
 
         public GameUdpClient(string host, int port)
         {

@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
-
 
 namespace CameraController
 {
@@ -18,7 +14,7 @@ namespace CameraController
 
         private void Update()
         {
-            _camera.transform.Rotate(0, rotateDegreePerSecond * Time.deltaTime, 0);   
+            _camera.transform.Rotate(0, rotateDegreePerSecond * Time.deltaTime, 0);
         }
     }
 }

@@ -20,6 +20,7 @@ namespace UI
                     Debug.Log("Login Failed, Please retry!");
                     return;
                 }
+
                 gameObject.SetActive(false);
                 Debug.Log("Login Success");
             });

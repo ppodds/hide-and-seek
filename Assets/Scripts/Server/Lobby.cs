@@ -20,8 +20,7 @@ namespace Server
 
         public List<OnlinePlayer> Players { get; set; }
 
-        [JsonProperty("curPeople")]
-        public byte CurrentPeople { get; set; }
+        [JsonProperty("curPeople")] public byte CurrentPeople { get; set; }
 
         public byte MaxPeople { get; set; }
     }

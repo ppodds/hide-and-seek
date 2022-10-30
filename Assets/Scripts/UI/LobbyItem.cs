@@ -1,6 +1,6 @@
 ﻿using Server;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 namespace UI
 {
