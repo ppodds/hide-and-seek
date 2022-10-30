@@ -7,10 +7,11 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    private GameTcpClient _gameTcpClient;
-    private GameUdpClient _gameUdpClient;
+    public uint ID { get; private set; }
 
-    private uint _id;
+    public GameTcpClient GameTcpClient { get; private set; }
+
+    public GameUdpClient GameUdpClient { get; private set; }
 
     public static GameManager Instance { get; private set; }
 
@@ -30,15 +31,15 @@ public class GameManager : MonoBehaviour
     {
         try
         {
-            _gameTcpClient = new GameTcpClient(host, tcpPort);
-            _gameUdpClient = new GameUdpClient(host, udpPort);
+            GameTcpClient = new GameTcpClient(host, tcpPort);
+            GameUdpClient = new GameUdpClient(host, udpPort);
         }
         catch (SocketException e)
         {
             return false;
         }
 
-        _id = await _gameTcpClient.Login();
+        ID = await GameTcpClient.Login();
         return true;
     }
 }
