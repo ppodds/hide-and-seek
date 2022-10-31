@@ -3,8 +3,8 @@ package server
 import (
 	"flag"
 	"fmt"
-	"github.com/ppodds/hide-and-seek-server/server/lobby"
-	"github.com/ppodds/hide-and-seek-server/server/player"
+	"github.com/ppodds/hide-and-seek/server/lobby"
+	"github.com/ppodds/hide-and-seek/server/player"
 	"log"
 	"net"
 	"os"

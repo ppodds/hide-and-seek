@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/ppodds/hide-and-seek-server/server"
+	"github.com/ppodds/hide-and-seek/server"
 )
 
 func JoinLobby(ctx server.TCPContext) {

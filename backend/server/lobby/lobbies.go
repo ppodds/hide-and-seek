@@ -1,7 +1,7 @@
 package lobby
 
 import (
-	"github.com/ppodds/hide-and-seek-server/server/player"
+	"github.com/ppodds/hide-and-seek/server/player"
 	"sync"
 )
 

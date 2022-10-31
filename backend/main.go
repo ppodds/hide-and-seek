@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/ppodds/hide-and-seek-server/server"
-	"github.com/ppodds/hide-and-seek-server/server/tcpproc"
+	"github.com/ppodds/hide-and-seek/server"
+	"github.com/ppodds/hide-and-seek/server/tcpproc"
 )
 
 func bootstrap() *server.App {

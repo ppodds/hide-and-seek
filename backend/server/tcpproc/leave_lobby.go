@@ -3,7 +3,7 @@ package tcpproc
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/ppodds/hide-and-seek-server/server"
+	"github.com/ppodds/hide-and-seek/server"
 )
 
 func LeaveLobby(ctx server.TCPContext) {

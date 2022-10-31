@@ -3,7 +3,7 @@ package tcpproc
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ppodds/hide-and-seek-server/server"
+	"github.com/ppodds/hide-and-seek/server"
 )
 
 func LobbyList(ctx server.TCPContext) {
