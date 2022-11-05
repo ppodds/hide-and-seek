@@ -14,12 +14,13 @@ type Players struct {
 func NewPlayers() *Players {
 	players := new(Players)
 	players.players = make(map[uint32]*Player)
+	players.curID = 1
 	return players
 }
 
-func (players *Players) AddPlayer(conn *net.Conn) *Player {
+func (players *Players) AddPlayer(tcpConn *net.TCPConn) *Player {
 	players.Lock()
-	player := NewPlayer(players.curID, conn)
+	player := NewPlayer(players.curID, tcpConn)
 	players.players[player.ID] = player
 	players.curID++
 	players.Unlock()

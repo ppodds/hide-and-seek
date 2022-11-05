@@ -1,18 +1,24 @@
 package tcpproc
 
 import (
-	"encoding/binary"
 	"fmt"
+	"github.com/ppodds/hide-and-seek/protos"
 	"github.com/ppodds/hide-and-seek/server"
 )
 
-func Login(ctx server.TCPContext) {
+type Login struct {
+}
+
+func (login *Login) Proc(ctx *server.TCPContext) error {
 	player := ctx.App.Players.AddPlayer(ctx.Conn)
-	buf := make([]byte, 4)
-	binary.LittleEndian.PutUint32(buf, player.ID)
-	_, err := (*ctx.Conn).Write(buf)
+	err := sendRes(ctx, &protos.Player{Id: player.ID})
 	if err != nil {
-		fmt.Println("unable to send message to tcp client")
-		return
+		return err
 	}
+	return nil
+}
+
+func (login *Login) ErrorHandler(procErr error, ctx *server.TCPContext) error {
+	fmt.Println(procErr)
+	return nil
 }

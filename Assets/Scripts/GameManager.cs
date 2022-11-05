@@ -31,7 +31,8 @@ public class GameManager : MonoBehaviour
         GameUdpClient = new GameUdpClient(host, udpPort);
         try
         {
-            ID = await GameTcpClient.Login();
+            ID = (await GameTcpClient.Login()).Id;
+            GameUdpClient.Connect();
         }
         catch (SocketException e)
         {

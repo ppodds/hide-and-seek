@@ -1,4 +1,6 @@
-﻿using Server;
+﻿using System;
+using System.Threading;
+using Protos;
 using UnityEngine;
 
 namespace UI
@@ -9,11 +11,48 @@ namespace UI
         [SerializeField] private GameObject playerItem;
         [SerializeField] private GameObject lobbyList;
 
+        private CancellationTokenSource _tokenSource;
+
         private bool _trying;
 
         public Lobby Lobby { get; set; }
 
+        private async void OnEnable()
+        {
+            _tokenSource = new CancellationTokenSource();
+            try
+            {
+                while (true)
+                {
+                    var result = await GameManager.Instance.GameUdpClient.WaitLobbyBroadcast(_tokenSource.Token);
+                    switch (result.Event)
+                    {
+                        case LobbyEvent.Join:
+                        case LobbyEvent.Leave:
+                            Lobby = result.Lobby;
+                            UpdatePrepareRoom();
+                            break;
+                        case LobbyEvent.Destroy:
+                            BackToLobbyList();
+                            break;
+                        case LobbyEvent.Start:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
+            catch (OperationCanceledException e)
+            {
+            }
+        }
+
         private void OnDisable()
+        {
+            ClearPlayerList();
+        }
+
+        private void ClearPlayerList()
         {
             for (var i = 0; i < playerListTransform.childCount; i++)
                 Destroy(playerListTransform.GetChild(i).gameObject);
@@ -21,6 +60,7 @@ namespace UI
 
         public void UpdatePrepareRoom()
         {
+            ClearPlayerList();
             foreach (var player in Lobby.Players)
             {
                 var t = Instantiate(playerItem, playerListTransform);
@@ -33,7 +73,9 @@ namespace UI
             if (_trying)
                 return;
             _trying = true;
-            var task = GameManager.Instance.GameTcpClient.LeaveLobby(Lobby.ID);
+            _tokenSource.Cancel();
+            _tokenSource.Dispose();
+            var task = GameManager.Instance.GameTcpClient.LeaveLobby(Lobby);
             task.GetAwaiter().OnCompleted(() =>
             {
                 _trying = false;

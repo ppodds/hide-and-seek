@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+option go_package = ".;protos";
+option csharp_namespace = "Protos";
+
+import "protos/player.proto";
+
+message Lobby {
+  uint32 id = 1;
+  Player lead = 2;
+  repeated Player players = 3;
+  uint32 curPeople = 4;
+  uint32 maxPeople = 5;
+}
+
+message CreateLobbyRequest {
+  Player lead = 1;
+}
+
+message CreateLobbyResponse {
+  bool success = 1;
+  optional Lobby lobby = 2;
+}
+
+message LeaveLobbyRequest {
+  Lobby lobby = 1;
+  Player player = 2;
+}
+
+message LeaveLobbyResponse {
+  bool success = 1;
+}
+
+message JoinLobbyRequest {
+  Lobby lobby = 1;
+  Player player = 2;
+}
+
+message JoinLobbyResponse {
+  bool success = 1;
+  optional Lobby lobby = 2;
+}
+
+message ConnectLobbyRequest {
+  Player player = 1;
+}
+
+message ConnectLobbyResponse {
+  bool success = 1;
+}
+
+enum LobbyEvent {
+  JOIN = 0;
+  LEAVE = 1;
+  DESTROY = 2;
+  START = 3;
+}
+
+message LobbyBroadcast {
+  LobbyEvent event = 1;
+  Lobby lobby = 2;
+}

@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = ".;protos";
+option csharp_namespace = "Protos";
+
+import "protos/lobby.proto";
+
+message Lobbies {
+  map<uint32, Lobby> lobbies = 1;
+}

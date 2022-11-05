@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option go_package = ".;protos";
+option csharp_namespace = "Protos";
+
+message Error {
+  uint32 code = 1;
+  string message = 2;
+}

@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Net.Sockets;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Server;
+using Google.Protobuf;
+using Protos;
 using UnityEngine;
 
 namespace IO.Net
@@ -23,75 +22,109 @@ namespace IO.Net
             _port = port;
         }
 
-        public async Task<uint> Login()
+        private async Task RpcCall(byte procId)
         {
-            await _tcpClient.ConnectAsync(_host, _port);
-            var stream = _tcpClient.GetStream();
-            var buf = new byte[] { 0 };
-            await stream.WriteAsync(buf);
-            buf = new byte[4];
-            var n = await stream.ReadAsync(buf);
-            if (n != 4)
-                throw new WrongProtocolException();
-            return BitConverter.ToUInt32(buf);
+            await RpcCall(procId, Array.Empty<byte>());
         }
 
-        public async Task<Dictionary<uint, Lobby>> GetLobbies()
+        private async Task RpcCall(byte procId, byte[] data)
         {
             var stream = _tcpClient.GetStream();
-            var buf = new byte[] { 1 };
-            await stream.WriteAsync(buf);
-            buf = new byte[4096];
-            var n = await stream.ReadAsync(buf);
-            var lobbies = JsonConvert.DeserializeObject<Dictionary<uint, Lobby>>(Encoding.UTF8.GetString(buf));
-            return lobbies;
+            var outputStream = new MemoryStream();
+            await outputStream.WriteAsync(new[] { procId });
+            await outputStream.WriteAsync(BitConverter.GetBytes(data.Length));
+            await outputStream.WriteAsync(data);
+            await stream.WriteAsync(outputStream.ToArray());
+        }
+
+        private async Task<byte[]> ReadRpcResponse(CancellationToken token = default)
+        {
+            var stream = _tcpClient.GetStream();
+            var buf = new byte[4];
+            var n = await stream.ReadAsync(buf, token);
+            token.ThrowIfCancellationRequested();
+            if (n != buf.Length)
+                throw new WrongProtocolException();
+            var resLength = BitConverter.ToUInt32(buf);
+            if (resLength == 0)
+                return null;
+            buf = new byte[resLength];
+            n = await stream.ReadAsync(buf, token);
+            token.ThrowIfCancellationRequested();
+            if (n != buf.Length)
+                throw new WrongProtocolException();
+            return buf;
+        }
+
+        public async Task<Player> Login()
+        {
+            await _tcpClient.ConnectAsync(_host, _port);
+            await RpcCall(0);
+            var data = await ReadRpcResponse();
+            return Player.Parser.ParseFrom(data);
+        }
+
+        public async Task<Lobbies> GetLobbies()
+        {
+            await RpcCall(1);
+            var buf = await ReadRpcResponse();
+            return buf == null ? null : Lobbies.Parser.ParseFrom(buf);
         }
 
         public async Task<Lobby> CreateLobby()
         {
-            var stream = _tcpClient.GetStream();
-            var buf = new byte[] { 2 }.Concat(BitConverter.GetBytes(GameManager.Instance.ID)).ToArray();
-            await stream.WriteAsync(buf);
-            buf = new byte[1024];
-            var n = await stream.ReadAsync(buf);
-            var lobby = JsonConvert.DeserializeObject<Lobby>(Encoding.UTF8.GetString(buf));
-            return lobby;
+            var player = new Player
+            {
+                Id = GameManager.Instance.ID
+            };
+            var data = new CreateLobbyRequest
+            {
+                Lead = player
+            };
+            var outputStream = new MemoryStream();
+            data.WriteTo(outputStream);
+            await RpcCall(2, outputStream.ToArray());
+            var buf = await ReadRpcResponse();
+            return CreateLobbyResponse.Parser.ParseFrom(buf).Lobby;
         }
 
-        public async Task<Lobby> JoinLobby(uint id)
+        public async Task<Lobby> JoinLobby(Lobby lobby)
         {
-            var stream = _tcpClient.GetStream();
-            var buf = new byte[] { 3 }.Concat(BitConverter.GetBytes(GameManager.Instance.ID))
-                .Concat(BitConverter.GetBytes(id)).ToArray();
-            await stream.WriteAsync(buf);
-            buf = new byte[1024];
-            var n = await stream.ReadAsync(buf);
-            if (n == 1 && buf[0] == 0)
+            var player = new Player
             {
-                Debug.Log("Unable to join the lobby");
-                return null;
-            }
-
-            var lobby = JsonConvert.DeserializeObject<Lobby>(Encoding.UTF8.GetString(buf));
-            return lobby;
+                Id = GameManager.Instance.ID
+            };
+            var data = new JoinLobbyRequest
+            {
+                Player = player,
+                Lobby = lobby
+            };
+            var outputStream = new MemoryStream();
+            data.WriteTo(outputStream);
+            await RpcCall(3, outputStream.ToArray());
+            var buf = await ReadRpcResponse();
+            var res = JoinLobbyResponse.Parser.ParseFrom(buf);
+            if (!res.Success) Debug.Log("Unable to join the lobby");
+            return res.Lobby;
         }
 
-        public async Task<Lobby> LeaveLobby(uint id)
+        public async Task LeaveLobby(Lobby lobby)
         {
-            var stream = _tcpClient.GetStream();
-            var buf = new byte[] { 4 }.Concat(BitConverter.GetBytes(GameManager.Instance.ID))
-                .Concat(BitConverter.GetBytes(id)).ToArray();
-            await stream.WriteAsync(buf);
-            buf = new byte[1024];
-            var n = await stream.ReadAsync(buf);
-            if (n == 1 && buf[0] == 0)
+            var player = new Player
             {
-                Debug.Log("Unable to leave the lobby");
-                return null;
-            }
-
-            var lobby = JsonConvert.DeserializeObject<Lobby>(Encoding.UTF8.GetString(buf));
-            return lobby;
+                Id = GameManager.Instance.ID
+            };
+            var data = new LeaveLobbyRequest
+            {
+                Player = player,
+                Lobby = lobby
+            };
+            var outputStream = new MemoryStream();
+            data.WriteTo(outputStream);
+            await RpcCall(4, outputStream.ToArray());
+            var buf = await ReadRpcResponse();
+            var res = LeaveLobbyResponse.Parser.ParseFrom(buf);
+            if (!res.Success) Debug.Log("Unable to leave the lobby");
         }
     }
 }

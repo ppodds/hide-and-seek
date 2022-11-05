@@ -1,4 +1,5 @@
-﻿using Server;
+﻿using System.Threading.Tasks;
+using Protos;
 using UnityEngine;
 
 namespace UI
@@ -14,7 +15,9 @@ namespace UI
             var task = GameManager.Instance.GameTcpClient.GetLobbies();
             task.GetAwaiter().OnCompleted(() =>
             {
-                foreach (var lobby in task.Result)
+                if (task.Result == null)
+                    return;
+                foreach (var lobby in task.Result.Lobbies_)
                 {
                     var t = Instantiate(lobbyItem, lobbyListTransform).GetComponent<LobbyItem>();
                     t.Lobby = lobby.Value;
@@ -31,20 +34,29 @@ namespace UI
             for (var i = 0; i < lobbyListTransform.childCount; i++) Destroy(lobbyListTransform.GetChild(i).gameObject);
         }
 
+        private async Task Join()
+        {
+            var lobby = await GameManager.Instance.GameTcpClient.CreateLobby();
+            if (lobby == null)
+            {
+                Debug.Log("Create lobby failed");
+                return;
+            }
+
+            var result = await GameManager.Instance.GameUdpClient.ConnectLobby();
+            if (!result.Success)
+            {
+                Debug.Log("Connect to lobby failed");
+                return;
+            }
+
+            ShowPrepareRoom(lobby);
+            Debug.Log("Create lobby success");
+        }
+
         public void CreateLobby()
         {
-            var task = GameManager.Instance.GameTcpClient.CreateLobby();
-            task.GetAwaiter().OnCompleted(() =>
-            {
-                if (task.Result == null)
-                {
-                    Debug.Log("Create lobby failed");
-                    return;
-                }
-
-                ShowPrepareRoom(task.Result);
-                Debug.Log("Create lobby success");
-            });
+            Join();
         }
 
         public void ShowPrepareRoom(Lobby lobby)

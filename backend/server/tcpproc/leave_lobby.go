@@ -1,47 +1,101 @@
 package tcpproc
 
 import (
-	"encoding/binary"
+	"errors"
 	"fmt"
+	"github.com/ppodds/hide-and-seek/protos"
 	"github.com/ppodds/hide-and-seek/server"
+	"github.com/ppodds/hide-and-seek/server/rpc"
+	"google.golang.org/protobuf/proto"
 )
 
-func LeaveLobby(ctx server.TCPContext) {
-	playerID := binary.LittleEndian.Uint32(ctx.Data[1:5])
-	lobbyID := binary.LittleEndian.Uint32(ctx.Data[5:])
-	player, ok := ctx.App.Players.Players()[playerID]
-	if !ok {
-		fmt.Println("Invalid player id")
-		return
+type LeaveLobby struct {
+}
+
+func (leaveLobby *LeaveLobby) Proc(ctx *server.TCPContext) error {
+	req := new(protos.LeaveLobbyRequest)
+	err := unmarshalData(ctx, req)
+	if err != nil {
+		return err
 	}
-	lobby, ok := ctx.App.Lobbies.Lobbies()[lobbyID]
+	player, ok := ctx.App.Players.Players()[req.Player.Id]
 	if !ok {
-		fmt.Println("Invalid lobby id")
+		return errors.New("invalid player id")
 	}
-	lobby = lobby.RmPeople(player)
-	if lobby == nil {
-		// write error to client
-		_, err := (*ctx.Conn).Write([]byte{0})
-		if err != nil {
-			fmt.Println("unable to send message to tcp client")
-			return
+	lobby, ok := ctx.App.Lobbies.Lobbies()[req.Lobby.Id]
+	if !ok {
+		return errors.New("invalid lobby id")
+	}
+	// check if player is not in the lobby
+	inLobby := false
+	for _, p := range lobby.Players() {
+		if p.ID == player.ID {
+			inLobby = true
+			break
 		}
-		return
 	}
+	if !inLobby {
+		err = leaveLobby.leaveFailed(ctx)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	lobby, err = lobby.RmPeople(player)
+	if err != nil {
+		err2 := leaveLobby.leaveFailed(ctx)
+		if err2 != nil {
+			return err2
+		}
+		return err
+	}
+	// remove lobby if lead leave or the lobby member amount = 0
 	if lobby.CurPeople() == 0 || lobby.Lead().ID == player.ID {
 		ctx.App.Lobbies.RmLobby(lobby.ID)
 	}
-	_, err := (*ctx.Conn).Write([]byte{1})
+	// send resp to client
+	res := &protos.LeaveLobbyResponse{Success: true}
+	buf, err := proto.Marshal(res)
 	if err != nil {
-		fmt.Println("unable to send message to tcp client")
-		return
+		return err
+	}
+	err = rpc.SendTCPRes(ctx.Conn, buf)
+	if err != nil {
+		return err
+	}
+	// broadcast to lobby
+	lobbyProto, err2 := lobby.MarshalProtoBuf()
+	if err2 != nil {
+		return err2
+	}
+	res2 := &protos.LobbyBroadcast{Event: protos.LobbyEvent_LEAVE, Lobby: lobbyProto}
+	buf, err2 = proto.Marshal(res2)
+	if err2 != nil {
+		return err2
 	}
 	for _, p := range lobby.Players() {
-		_, err := (*p.Conn()).Write([]byte{1})
+		err = rpc.SendUDPRes(p.UDPConn(), p.UDPAddr(), buf)
 		if err != nil {
-			fmt.Println("unable to send message to tcp client")
-			return
+			fmt.Println("skip broadcast to", p.UDPAddr(), "because", err)
+			continue
 		}
 	}
-	return
+	return nil
+}
+
+func (leaveLobby *LeaveLobby) ErrorHandler(procErr error, ctx *server.TCPContext) error {
+	fmt.Println(procErr)
+	return nil
+}
+func (leaveLobby *LeaveLobby) leaveFailed(ctx *server.TCPContext) error {
+	res := &protos.LeaveLobbyResponse{Success: false}
+	buf, err := proto.Marshal(res)
+	if err != nil {
+		return err
+	}
+	err = rpc.SendTCPRes(ctx.Conn, buf)
+	if err != nil {
+		return err
+	}
+	return nil
 }

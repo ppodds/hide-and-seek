@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option go_package = ".;protos";
+option csharp_namespace = "Protos";
+
+message Player {
+  uint32 id = 1;
+}

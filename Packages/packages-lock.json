@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.system-community.systemruntimecompilerservicesunsafe": {
+      "version": "4.5.3",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
     "com.unity.burst": {
       "version": "1.6.5",
       "depth": 1,

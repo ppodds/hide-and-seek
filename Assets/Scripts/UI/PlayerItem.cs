@@ -1,4 +1,4 @@
-﻿using Server;
+﻿using Protos;
 using TMPro;
 using UnityEngine;
 
@@ -9,10 +9,10 @@ namespace UI
         [SerializeField] private TMP_Text lead;
         [SerializeField] private TMP_Text player;
 
-        public void SetText(Lobby lobby, OnlinePlayer p)
+        public void SetText(Lobby lobby, Player p)
         {
-            lead.gameObject.SetActive(lobby.Lead.ID == p.ID);
-            player.SetText(p.ID.ToString());
+            lead.gameObject.SetActive(lobby.Lead.Id == p.Id);
+            player.SetText(p.Id.ToString());
         }
     }
 }

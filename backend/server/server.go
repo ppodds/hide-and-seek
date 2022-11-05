@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ppodds/hide-and-seek/server/lobby"
 	"github.com/ppodds/hide-and-seek/server/player"
+	"github.com/ppodds/hide-and-seek/server/rpc"
 	"log"
 	"net"
 	"os"
@@ -13,14 +14,12 @@ import (
 
 type App struct {
 	sync.RWMutex
-	tcpProcs    [256]func(ctx TCPContext)
-	udpProcs    [256]func(ctx UDPContext)
-	tcpProcNum  byte
-	udpProcNum  byte
-	Lobbies     *lobby.Lobbies
-	tcpListener net.TCPConn
-	udpConn     net.UDPConn
-	Players     *player.Players
+	tcpProcs   [256]TCPProc
+	udpProcs   [256]UDPProc
+	tcpProcNum byte
+	udpProcNum byte
+	Lobbies    *lobby.Lobbies
+	Players    *player.Players
 }
 
 func NewApp() *App {
@@ -31,45 +30,91 @@ func NewApp() *App {
 	return app
 }
 
-func (app *App) HandleTcpProc(conn *net.Conn) {
+func (app *App) HandleTcpProc(conn *net.TCPConn) {
 	for {
-		ctx := TCPContext{app, conn, make([]byte, 1024)}
-		_, err := (*conn).Read(ctx.Data)
+		buf := make([]byte, 5)
+		_, err := conn.Read(buf)
 		if err != nil {
 			if err.Error() == "EOF" {
 				continue
 			}
-			fmt.Println("failed to read TCP msg because of ", err.Error())
+			fmt.Println("failed to read TCP msg because of", err.Error())
 			return
 		}
-		procId := ctx.Data[0]
-		if !(procId <= app.tcpProcNum) {
+		ctx, err := rpc.ParseCall(buf)
+		if err != nil {
+			fmt.Printf("unsupport protocal. error: %s\n", err.Error())
 			return
 		}
-		app.tcpProcs[procId](ctx)
+		if ctx.ContentLength != 0 {
+			buf = make([]byte, ctx.ContentLength)
+			_, err = conn.Read(buf)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		} else {
+			buf = nil
+		}
+		if !(ctx.ProcID <= app.tcpProcNum) {
+			return
+		}
+		tcpCtx := TCPContext{app, conn, buf}
+		fmt.Println("Invoke TCP Proc", ctx.ProcID)
+		err = app.tcpProcs[ctx.ProcID].Proc(&tcpCtx)
+		if err != nil {
+			err := app.tcpProcs[ctx.ProcID].ErrorHandler(err, &tcpCtx)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
 	}
 }
 
 func (app *App) HandleUdpProc(conn *net.UDPConn) {
-	ctx := UDPContext{app, conn, make([]byte, 1024)}
-	_, _, err := conn.ReadFromUDP(ctx.Data)
+	buf := make([]byte, 5)
+	_, remoteAddr, err := conn.ReadFromUDP(buf)
 	if err != nil {
-		fmt.Println("failed to read UDP msg because of ", err.Error())
+		fmt.Println("failed to read UDP msg because of", err.Error())
 		return
 	}
-	procId := ctx.Data[0]
-	if !(procId <= app.udpProcNum) {
+	ctx, err := rpc.ParseCall(buf)
+	if err != nil {
+		fmt.Printf("unsupport protocal. error: %s\n", err.Error())
 		return
 	}
-	go app.udpProcs[procId](ctx)
+	if ctx.ContentLength != 0 {
+		buf = make([]byte, ctx.ContentLength)
+		_, _, err = conn.ReadFromUDP(buf)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else {
+		buf = nil
+	}
+	if !(ctx.ProcID <= app.udpProcNum) {
+		return
+	}
+	udpCtx := UDPContext{app, conn, remoteAddr, buf}
+	fmt.Println("Invoke UDP Proc", ctx.ProcID)
+	err = app.udpProcs[ctx.ProcID].Proc(&udpCtx)
+	if err != nil {
+		err := app.udpProcs[ctx.ProcID].ErrorHandler(err, &udpCtx)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
 }
 
-func (app *App) AddTCPProc(proc func(ctx TCPContext)) {
+func (app *App) AddTCPProc(proc TCPProc) {
 	app.tcpProcs[app.tcpProcNum] = proc
 	app.tcpProcNum++
 }
 
-func (app *App) AddUDPProc(proc func(ctx UDPContext)) {
+func (app *App) AddUDPProc(proc UDPProc) {
 	app.udpProcs[app.udpProcNum] = proc
 	app.udpProcNum++
 }
@@ -92,12 +137,12 @@ func (app *App) Start() {
 	}()
 
 	for {
-		conn, err := tcpServer.Accept()
+		conn, err := tcpServer.AcceptTCP()
 		if err != nil {
 			log.Println(err)
 			continue
 		}
-		go app.HandleTcpProc(&conn)
+		go app.HandleTcpProc(conn)
 	}
 }
 

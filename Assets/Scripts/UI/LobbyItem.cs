@@ -1,4 +1,5 @@
-﻿using Server;
+﻿using System.Threading.Tasks;
+using Protos;
 using TMPro;
 using UnityEngine;
 
@@ -14,23 +15,32 @@ namespace UI
 
         public void UpdateText()
         {
-            lead.SetText("Lead: " + Lobby.Lead.ID);
-            people.SetText(Lobby.CurrentPeople + " / " + Lobby.MaxPeople);
+            lead.SetText("Lead: " + Lobby.Lead.Id);
+            people.SetText(Lobby.CurPeople + " / " + Lobby.MaxPeople);
+        }
+
+        private async Task JoinRoomTask()
+        {
+            var lobby = await GameManager.Instance.GameTcpClient.JoinLobby(Lobby);
+            if (lobby == null)
+            {
+                Debug.Log("Join failed");
+                return;
+            }
+
+            var result = await GameManager.Instance.GameUdpClient.ConnectLobby();
+            if (!result.Success)
+            {
+                Debug.Log("Connect to lobby failed");
+                return;
+            }
+
+            LobbyPanel.ShowPrepareRoom(lobby);
         }
 
         public void JoinRoom()
         {
-            var task = GameManager.Instance.GameTcpClient.JoinLobby(Lobby.ID);
-            task.GetAwaiter().OnCompleted(() =>
-            {
-                if (task.Result == null)
-                {
-                    Debug.Log("Join failed");
-                    return;
-                }
-
-                LobbyPanel.ShowPrepareRoom(task.Result);
-            });
+            JoinRoomTask();
         }
     }
 }

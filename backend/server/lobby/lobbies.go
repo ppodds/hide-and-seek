@@ -1,6 +1,7 @@
 package lobby
 
 import (
+	"github.com/ppodds/hide-and-seek/protos"
 	"github.com/ppodds/hide-and-seek/server/player"
 	"sync"
 )
@@ -14,10 +15,11 @@ type Lobbies struct {
 func NewLobbys() *Lobbies {
 	lobbies := new(Lobbies)
 	lobbies.lobbies = make(map[uint32]*Lobby)
+	lobbies.curID = 1
 	return lobbies
 }
 
-func (lobbies *Lobbies) AddLobby(lead *player.Player, maxNum uint8) *Lobby {
+func (lobbies *Lobbies) AddLobby(lead *player.Player, maxNum uint32) *Lobby {
 	lobbies.Lock()
 	lobby := NewLobby(lobbies.curID, lead, maxNum)
 	lobbies.lobbies[lobby.ID] = lobby
@@ -42,4 +44,18 @@ func (lobbies *Lobbies) RmLobby(id uint32) bool {
 	delete(lobbies.lobbies, id)
 	lobbies.Unlock()
 	return true
+}
+
+func (lobbies *Lobbies) MarshalProtoBuf() (*protos.Lobbies, error) {
+	lobbies.RLock()
+	defer lobbies.RUnlock()
+	m := make(map[uint32]*protos.Lobby)
+	for k, v := range lobbies.lobbies {
+		data, err := v.MarshalProtoBuf()
+		if err != nil {
+			return nil, err
+		}
+		m[k] = data
+	}
+	return &protos.Lobbies{Lobbies: m}, nil
 }

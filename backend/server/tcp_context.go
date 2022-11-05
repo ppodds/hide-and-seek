@@ -1,9 +1,11 @@
 package server
 
-import "net"
+import (
+	"net"
+)
 
 type TCPContext struct {
 	App  *App
-	Conn *net.Conn
+	Conn *net.TCPConn
 	Data []byte
 }

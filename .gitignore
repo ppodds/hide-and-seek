@@ -76,3 +76,10 @@ crashlytics-build.properties
 
 # Tools
 Assets/GitMerge-for-Unity*
+
+# protobuf
+backend/protos/*.pb.go
+Assets/Scripts/Protos/*
+
+# Unity NuGet
+Assets/Packages/*

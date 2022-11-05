@@ -1,20 +1,22 @@
 package tcpproc
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/ppodds/hide-and-seek/server"
 )
 
-func LobbyList(ctx server.TCPContext) {
-	data, err := json.Marshal(ctx.App.Lobbies.Lobbies())
+type LobbyList struct{}
+
+func (lobbyList *LobbyList) Proc(ctx *server.TCPContext) error {
+	data, err := ctx.App.Lobbies.MarshalProtoBuf()
 	if err != nil {
-		fmt.Printf("JSON marshaling failed: %s", err)
-		return
+		return err
 	}
-	_, err = (*ctx.Conn).Write(data)
-	if err != nil {
-		fmt.Println("unable to send message to tcp client")
-		return
-	}
+	err = sendRes(ctx, data)
+	return err
+}
+
+func (lobbyList *LobbyList) ErrorHandler(procErr error, ctx *server.TCPContext) error {
+	fmt.Println(procErr)
+	return nil
 }
