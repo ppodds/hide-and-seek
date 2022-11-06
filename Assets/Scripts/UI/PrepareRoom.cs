@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using Protos;
 using UnityEngine;
 
@@ -11,20 +10,18 @@ namespace UI
         [SerializeField] private GameObject playerItem;
         [SerializeField] private GameObject lobbyList;
 
-        private CancellationTokenSource _tokenSource;
-
         private bool _trying;
 
         public Lobby Lobby { get; set; }
 
         private async void OnEnable()
         {
-            _tokenSource = new CancellationTokenSource();
             try
             {
-                while (true)
+                var inLobby = true;
+                while (inLobby)
                 {
-                    var result = await GameManager.Instance.GameUdpClient.WaitLobbyBroadcast(_tokenSource.Token);
+                    var result = await GameManager.Instance.GameUdpClient.WaitLobbyBroadcast();
                     switch (result.Event)
                     {
                         case LobbyEvent.Join:
@@ -33,7 +30,11 @@ namespace UI
                             UpdatePrepareRoom();
                             break;
                         case LobbyEvent.Destroy:
-                            BackToLobbyList();
+                            GameManager.Instance.DisconnectUdp();
+                            lobbyList.SetActive(true);
+                            gameObject.SetActive(false);
+                            Debug.Log("Leave lobby success");
+                            inLobby = false;
                             break;
                         case LobbyEvent.Start:
                             break;
@@ -42,7 +43,7 @@ namespace UI
                     }
                 }
             }
-            catch (OperationCanceledException e)
+            catch (ObjectDisposedException e) // player has already leave the lobby
             {
             }
         }
@@ -73,8 +74,7 @@ namespace UI
             if (_trying)
                 return;
             _trying = true;
-            _tokenSource.Cancel();
-            _tokenSource.Dispose();
+            GameManager.Instance.DisconnectUdp();
             var task = GameManager.Instance.GameTcpClient.LeaveLobby(Lobby);
             task.GetAwaiter().OnCompleted(() =>
             {

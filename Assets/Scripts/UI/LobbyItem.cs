@@ -10,7 +10,6 @@ namespace UI
         [SerializeField] private TMP_Text lead;
         [SerializeField] private TMP_Text people;
 
-        public LobbyPanel LobbyPanel { get; set; }
         public Lobby Lobby { get; set; }
 
         public void UpdateText()
@@ -28,14 +27,7 @@ namespace UI
                 return;
             }
 
-            var result = await GameManager.Instance.GameUdpClient.ConnectLobby();
-            if (!result.Success)
-            {
-                Debug.Log("Connect to lobby failed");
-                return;
-            }
-
-            LobbyPanel.ShowPrepareRoom(lobby);
+            await GameManager.Instance.ConnectToLobby(lobby);
         }
 
         public void JoinRoom()

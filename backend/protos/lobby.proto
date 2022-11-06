@@ -58,5 +58,5 @@ enum LobbyEvent {
 
 message LobbyBroadcast {
   LobbyEvent event = 1;
-  Lobby lobby = 2;
+  optional Lobby lobby = 2;
 }

@@ -11,8 +11,13 @@ namespace UI
 
         public void Login()
         {
-            var task = GameManager.Instance.ConnectToServer(host.text, int.Parse(tcpPort.text),
-                int.Parse(udpPort.text));
+            GameManager.Instance.Server = new Server
+            {
+                Host = host.text,
+                TcpPort = int.Parse(tcpPort.text),
+                UdpPort = int.Parse(udpPort.text)
+            };
+            var task = GameManager.Instance.ConnectToServer();
             task.GetAwaiter().OnCompleted(() =>
             {
                 if (!task.Result)

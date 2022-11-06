@@ -21,7 +21,6 @@ namespace UI
                 {
                     var t = Instantiate(lobbyItem, lobbyListTransform).GetComponent<LobbyItem>();
                     t.Lobby = lobby.Value;
-                    t.LobbyPanel = this;
                     t.UpdateText();
                 }
 
@@ -43,15 +42,7 @@ namespace UI
                 return;
             }
 
-            var result = await GameManager.Instance.GameUdpClient.ConnectLobby();
-            if (!result.Success)
-            {
-                Debug.Log("Connect to lobby failed");
-                return;
-            }
-
-            ShowPrepareRoom(lobby);
-            Debug.Log("Create lobby success");
+            await GameManager.Instance.ConnectToLobby(lobby);
         }
 
         public void CreateLobby()

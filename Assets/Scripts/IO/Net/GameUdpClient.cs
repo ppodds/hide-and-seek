@@ -26,6 +26,11 @@ namespace IO.Net
             _udpClient.Connect(_host, _port);
         }
 
+        public void Disconnect()
+        {
+            _udpClient.Close();
+        }
+
         private async Task RpcCall(byte procId, byte[] data)
         {
             var outputStream = new MemoryStream();

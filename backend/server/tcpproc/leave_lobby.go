@@ -49,10 +49,6 @@ func (leaveLobby *LeaveLobby) Proc(ctx *server.TCPContext) error {
 		}
 		return err
 	}
-	// remove lobby if lead leave or the lobby member amount = 0
-	if lobby.CurPeople() == 0 || lobby.Lead().ID == player.ID {
-		ctx.App.Lobbies.RmLobby(lobby.ID)
-	}
 	// send resp to client
 	res := &protos.LeaveLobbyResponse{Success: true}
 	buf, err := proto.Marshal(res)
@@ -63,15 +59,22 @@ func (leaveLobby *LeaveLobby) Proc(ctx *server.TCPContext) error {
 	if err != nil {
 		return err
 	}
-	// broadcast to lobby
-	lobbyProto, err2 := lobby.MarshalProtoBuf()
-	if err2 != nil {
-		return err2
+	// remove lobby if lead leave or the lobby member amount = 0
+	var res2 *protos.LobbyBroadcast
+	if lobby.CurPeople() == 0 || lobby.Lead().ID == player.ID {
+		ctx.App.Lobbies.RmLobby(lobby.ID)
+		res2 = &protos.LobbyBroadcast{Event: protos.LobbyEvent_DESTROY}
+	} else {
+		lobbyProto, err2 := lobby.MarshalProtoBuf()
+		if err2 != nil {
+			return err2
+		}
+		res2 = &protos.LobbyBroadcast{Event: protos.LobbyEvent_LEAVE, Lobby: lobbyProto}
 	}
-	res2 := &protos.LobbyBroadcast{Event: protos.LobbyEvent_LEAVE, Lobby: lobbyProto}
-	buf, err2 = proto.Marshal(res2)
-	if err2 != nil {
-		return err2
+	// broadcast to lobby
+	buf, err = proto.Marshal(res2)
+	if err != nil {
+		return err
 	}
 	for _, p := range lobby.Players() {
 		err = rpc.SendUDPRes(p.UDPConn(), p.UDPAddr(), buf)
