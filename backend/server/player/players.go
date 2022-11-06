@@ -1,6 +1,7 @@
 package player
 
 import (
+	"github.com/ppodds/hide-and-seek/protos"
 	"net"
 	"sync"
 )
@@ -25,6 +26,12 @@ func (players *Players) AddPlayer(tcpConn *net.TCPConn) *Player {
 	players.curID++
 	players.Unlock()
 	return player
+}
+
+func (players *Players) RmPlayer(player *protos.Player) {
+	players.Lock()
+	defer players.Unlock()
+	delete(players.players, player.Id)
 }
 
 func (players *Players) Players() map[uint32]*Player {

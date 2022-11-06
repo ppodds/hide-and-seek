@@ -126,5 +126,20 @@ namespace IO.Net
             var res = LeaveLobbyResponse.Parser.ParseFrom(buf);
             if (!res.Success) Debug.Log("Unable to leave the lobby");
         }
+
+        public async Task Logout()
+        {
+            var player = new Player
+            {
+                Id = GameManager.Instance.ID
+            };
+            var data = new LogoutRequest
+            {
+                Player = player
+            };
+            var outputStream = new MemoryStream();
+            data.WriteTo(outputStream);
+            await RpcCall(5, outputStream.ToArray());
+        }
     }
 }

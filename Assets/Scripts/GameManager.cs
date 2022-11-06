@@ -81,4 +81,10 @@ public class GameManager : MonoBehaviour
         GameUdpClient.Disconnect();
         GameUdpClient = null;
     }
+
+    public void Logout()
+    {
+        var task = GameTcpClient.Logout();
+        task.GetAwaiter().OnCompleted(Application.Quit);
+    }
 }

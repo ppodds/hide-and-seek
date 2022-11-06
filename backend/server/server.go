@@ -56,7 +56,7 @@ func (app *App) HandleTcpProc(conn *net.TCPConn) {
 		} else {
 			buf = nil
 		}
-		if !(ctx.ProcID <= app.tcpProcNum) {
+		if !(ctx.ProcID < app.tcpProcNum) {
 			return
 		}
 		tcpCtx := TCPContext{app, conn, buf}

@@ -6,3 +6,7 @@ option csharp_namespace = "Protos";
 message Player {
   uint32 id = 1;
 }
+
+message LogoutRequest {
+  Player player = 1;
+}
