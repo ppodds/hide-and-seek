@@ -11,6 +11,7 @@ message Lobby {
   repeated Player players = 3;
   uint32 curPeople = 4;
   uint32 maxPeople = 5;
+  bool inGame = 6;
 }
 
 message CreateLobbyRequest {
@@ -59,4 +60,13 @@ enum LobbyEvent {
 message LobbyBroadcast {
   LobbyEvent event = 1;
   optional Lobby lobby = 2;
+}
+
+message StartGameRequest {
+  Player player = 1;
+  Lobby lobby = 2;
+}
+
+message StartGameResponse {
+  bool success = 1;
 }

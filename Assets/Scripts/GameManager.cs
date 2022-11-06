@@ -4,6 +4,7 @@ using IO.Net;
 using Protos;
 using UI;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public struct Server
 {
@@ -15,6 +16,7 @@ public struct Server
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private LobbyPanel lobbyPanel;
+    [SerializeField] private GameObject menuUI;
     public uint ID { get; private set; }
 
     public GameTcpClient GameTcpClient { get; private set; }
@@ -86,5 +88,36 @@ public class GameManager : MonoBehaviour
     {
         var task = GameTcpClient.Logout();
         task.GetAwaiter().OnCompleted(Application.Quit);
+    }
+
+    private async Task<bool> ConnectToGame()
+    {
+        GameUdpClient = new GameUdpClient(Server.Host, Server.UdpPort);
+        try
+        {
+            GameUdpClient.Connect();
+        }
+        catch (SocketException e)
+        {
+            return false;
+        }
+
+        var result = await GameUdpClient.ConnectGame();
+        if (!result.Success)
+        {
+            Debug.Log("Connect to game failed");
+            return false;
+        }
+
+        SceneManager.LoadScene("Demo");
+        Debug.Log("Join game success");
+        return true;
+    }
+
+    public void StartGame()
+    {
+        DisconnectUdp();
+        ConnectToGame();
+        menuUI.SetActive(false);
     }
 }

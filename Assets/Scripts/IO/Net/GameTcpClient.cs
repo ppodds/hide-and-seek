@@ -47,7 +47,7 @@ namespace IO.Net
                 throw new WrongProtocolException();
             var resLength = BitConverter.ToUInt32(buf);
             if (resLength == 0)
-                return null;
+                return Array.Empty<byte>();
             buf = new byte[resLength];
             n = await stream.ReadAsync(buf, token);
             token.ThrowIfCancellationRequested();
@@ -140,6 +140,24 @@ namespace IO.Net
             var outputStream = new MemoryStream();
             data.WriteTo(outputStream);
             await RpcCall(5, outputStream.ToArray());
+        }
+
+        public async Task<bool> StartGame(Lobby lobby)
+        {
+            var player = new Player
+            {
+                Id = GameManager.Instance.ID
+            };
+            var data = new StartGameRequest
+            {
+                Player = player,
+                Lobby = lobby
+            };
+            var outputStream = new MemoryStream();
+            data.WriteTo(outputStream);
+            await RpcCall(6, outputStream.ToArray());
+            var result = await ReadRpcResponse();
+            return StartGameResponse.Parser.ParseFrom(result).Success;
         }
     }
 }

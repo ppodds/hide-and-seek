@@ -3,6 +3,7 @@ package server
 import (
 	"flag"
 	"fmt"
+	"github.com/ppodds/hide-and-seek/server/game"
 	"github.com/ppodds/hide-and-seek/server/lobby"
 	"github.com/ppodds/hide-and-seek/server/player"
 	"github.com/ppodds/hide-and-seek/server/rpc"
@@ -20,6 +21,7 @@ type App struct {
 	udpProcNum byte
 	Lobbies    *lobby.Lobbies
 	Players    *player.Players
+	Games      *game.Games
 }
 
 func NewApp() *App {
@@ -27,6 +29,7 @@ func NewApp() *App {
 	app.udpProcNum = 0
 	app.Lobbies = lobby.NewLobbys()
 	app.Players = player.NewPlayers()
+	app.Games = game.NewGames()
 	return app
 }
 

@@ -37,6 +37,8 @@ namespace UI
                             inLobby = false;
                             break;
                         case LobbyEvent.Start:
+                            GameManager.Instance.StartGame();
+                            inLobby = false;
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -87,6 +89,12 @@ namespace UI
 
         public void StartGame()
         {
+            var task = GameManager.Instance.GameTcpClient.StartGame(Lobby);
+            task.GetAwaiter().OnCompleted(() =>
+            {
+                if (!task.Result)
+                    Debug.Log("Start game failed");
+            });
         }
     }
 }

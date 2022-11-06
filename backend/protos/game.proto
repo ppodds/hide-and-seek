@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = ".;protos";
+option csharp_namespace = "Protos";
+
+import "protos/player.proto";
+
+message Game {
+
+}
+
+message ConnectGameRequest {
+  Player player = 1;
+}
+
+message ConnectGameResponse {
+  bool success = 1;
+}
+
+message GameBroadcast {
+  Game game = 1;
+}

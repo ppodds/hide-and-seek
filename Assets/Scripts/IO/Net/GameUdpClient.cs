@@ -75,5 +75,28 @@ namespace IO.Net
             var res = await ReadBroadcast(token);
             return LobbyBroadcast.Parser.ParseFrom(res);
         }
+
+        public async Task<ConnectGameResponse> ConnectGame()
+        {
+            var player = new Player
+            {
+                Id = GameManager.Instance.ID
+            };
+            var data = new ConnectGameRequest
+            {
+                Player = player
+            };
+            var outputStream = new MemoryStream();
+            data.WriteTo(outputStream);
+            await RpcCall(0, outputStream.ToArray());
+            var buf = await ReadRpcResponse();
+            return ConnectGameResponse.Parser.ParseFrom(buf);
+        }
+
+        public async Task<GameBroadcast> WaitGameBroadcast(CancellationToken token = default)
+        {
+            var res = await ReadBroadcast(token);
+            return GameBroadcast.Parser.ParseFrom(res);
+        }
     }
 }

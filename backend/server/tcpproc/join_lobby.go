@@ -10,7 +10,6 @@ import (
 )
 
 type JoinLobby struct {
-	replied bool
 }
 
 func (joinLobby *JoinLobby) Proc(ctx *server.TCPContext) error {
@@ -47,12 +46,12 @@ func (joinLobby *JoinLobby) Proc(ctx *server.TCPContext) error {
 	if err != nil {
 		return err
 	}
-	joinLobby.replied = true
 	// broadcast to lobby
 	t := &protos.LobbyBroadcast{Event: protos.LobbyEvent_JOIN, Lobby: protoLobby}
 	data, err := proto.Marshal(t)
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return nil
 	}
 	for _, p := range lobby.Players() {
 		if p.ID == player.ID {
@@ -68,16 +67,8 @@ func (joinLobby *JoinLobby) Proc(ctx *server.TCPContext) error {
 }
 
 func (joinLobby *JoinLobby) ErrorHandler(procErr error, ctx *server.TCPContext) error {
-	if joinLobby.replied {
-		return procErr
-	}
 	fmt.Println(procErr)
-	t := &protos.JoinLobbyResponse{Success: false}
-	data, err := proto.Marshal(t)
-	if err != nil {
-		return err
-	}
-	err = rpc.SendTCPRes(ctx.Conn, data)
+	err := sendRes(ctx, &protos.JoinLobbyResponse{Success: false})
 	if err != nil {
 		return err
 	}

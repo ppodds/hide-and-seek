@@ -1,20 +1,19 @@
 package lobby
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/ppodds/hide-and-seek/protos"
 	"github.com/ppodds/hide-and-seek/server/player"
-	"strconv"
 	"sync"
 )
 
 type Lobby struct {
-	ID        uint32 `json:"id"`
+	ID        uint32
 	lead      *player.Player
 	players   []*player.Player
 	curPeople uint32
 	maxPeople uint32
+	inGame    bool
 	sync.RWMutex
 }
 
@@ -25,6 +24,7 @@ func NewLobby(id uint32, lead *player.Player, maxPeople uint32) *Lobby {
 	lobby.players = []*player.Player{lead}
 	lobby.maxPeople = maxPeople
 	lobby.curPeople = 1
+	lobby.inGame = false
 	return lobby
 }
 
@@ -43,27 +43,7 @@ func (lobby *Lobby) MarshalProtoBuf() (*protos.Lobby, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &protos.Lobby{Id: lobby.ID, Lead: lead, Players: players, CurPeople: lobby.curPeople, MaxPeople: lobby.maxPeople}, nil
-}
-
-func (lobby *Lobby) MarshalJSON() ([]byte, error) {
-	lobby.RLock()
-	id := strconv.Itoa(int(lobby.ID))
-	lead, err := json.Marshal(lobby.lead)
-	if err != nil {
-		return nil, err
-	}
-	players, err := json.Marshal(lobby.players)
-	if err != nil {
-		return nil, err
-	}
-	curPeople := strconv.Itoa(int(lobby.curPeople))
-	maxPeople := strconv.Itoa(int(lobby.maxPeople))
-	lobby.RUnlock()
-	if err != nil {
-		return nil, err
-	}
-	return []byte(`{"id":` + id + `,"lead":` + string(lead) + `,"players":` + string(players) + `,"curPeople":` + curPeople + `,"maxPeople":` + maxPeople + `}`), nil
+	return &protos.Lobby{Id: lobby.ID, Lead: lead, Players: players, CurPeople: lobby.curPeople, MaxPeople: lobby.maxPeople, InGame: lobby.inGame}, nil
 }
 
 // AddPlayer Add a player into a lobby. Return new lobby if success, else nil.
@@ -97,13 +77,31 @@ func (lobby *Lobby) RmPeople(player *player.Player) (*Lobby, error) {
 }
 
 func (lobby *Lobby) CurPeople() uint32 {
+	lobby.RLock()
+	defer lobby.RUnlock()
 	return lobby.curPeople
 }
 
 func (lobby *Lobby) Lead() *player.Player {
+	lobby.RLock()
+	defer lobby.RUnlock()
 	return lobby.lead
 }
 
 func (lobby *Lobby) Players() []*player.Player {
+	lobby.RLock()
+	defer lobby.RUnlock()
 	return lobby.players
+}
+
+func (lobby *Lobby) InGame() bool {
+	lobby.RLock()
+	defer lobby.RUnlock()
+	return lobby.inGame
+}
+
+func (lobby *Lobby) SetInGame(v bool) {
+	lobby.Lock()
+	defer lobby.Unlock()
+	lobby.inGame = v
 }

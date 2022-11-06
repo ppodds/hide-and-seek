@@ -7,7 +7,7 @@ import (
 )
 
 type Player struct {
-	ID      uint32 `json:"id"`
+	ID      uint32
 	tcpConn *net.TCPConn
 	udpConn *net.UDPConn
 	udpAddr *net.UDPAddr

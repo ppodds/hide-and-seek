@@ -15,6 +15,7 @@ func bootstrap() *server.App {
 	app.AddTCPProc(new(tcpproc.JoinLobby))
 	app.AddTCPProc(new(tcpproc.LeaveLobby))
 	app.AddTCPProc(new(tcpproc.Logout))
+	app.AddTCPProc(new(tcpproc.StartGame))
 	app.AddUDPProc(new(udpproc.ConnectLobby))
 	return app
 }
