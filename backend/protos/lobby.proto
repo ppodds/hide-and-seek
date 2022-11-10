@@ -4,6 +4,7 @@ option go_package = ".;protos";
 option csharp_namespace = "Protos";
 
 import "protos/player.proto";
+import "protos/game_player.proto";
 
 message Lobby {
   uint32 id = 1;
@@ -60,6 +61,7 @@ enum LobbyEvent {
 message LobbyBroadcast {
   LobbyEvent event = 1;
   optional Lobby lobby = 2;
+  optional InitGame initGame = 3;
 }
 
 message StartGameRequest {

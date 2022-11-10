@@ -57,7 +57,7 @@ namespace IO.Net
         {
             var player = new Player
             {
-                Id = GameManager.Instance.ID
+                Id = GameManager.Instance.PlayerID
             };
             var data = new ConnectLobbyRequest
             {
@@ -80,7 +80,7 @@ namespace IO.Net
         {
             var player = new Player
             {
-                Id = GameManager.Instance.ID
+                Id = GameManager.Instance.PlayerID
             };
             var data = new ConnectGameRequest
             {
@@ -88,7 +88,7 @@ namespace IO.Net
             };
             var outputStream = new MemoryStream();
             data.WriteTo(outputStream);
-            await RpcCall(0, outputStream.ToArray());
+            await RpcCall(1, outputStream.ToArray());
             var buf = await ReadRpcResponse();
             return ConnectGameResponse.Parser.ParseFrom(buf);
         }
@@ -97,6 +97,34 @@ namespace IO.Net
         {
             var res = await ReadBroadcast(token);
             return GameBroadcast.Parser.ParseFrom(res);
+        }
+
+        public async Task UpdatePlayer(Character character)
+        {
+            var data = new UpdatePlayerRequest
+            {
+                Game = new Game
+                {
+                    Id = GameManager.Instance.GameState.Id
+                },
+                Player = new GamePlayer
+                {
+                    Player = new Player
+                    {
+                        Id = GameManager.Instance.PlayerID
+                    },
+                    Character = character
+                }
+            };
+            var outputStream = new MemoryStream();
+            data.WriteTo(outputStream);
+            await RpcCall(2, outputStream.ToArray());
+        }
+
+        public async Task<UpdatePlayerBroadcast> WaitPlayerUpdateBroadcast(CancellationToken token = default)
+        {
+            var res = await ReadBroadcast(token);
+            return UpdatePlayerBroadcast.Parser.ParseFrom(res);
         }
     }
 }

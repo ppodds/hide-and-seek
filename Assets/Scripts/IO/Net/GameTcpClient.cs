@@ -75,7 +75,7 @@ namespace IO.Net
         {
             var player = new Player
             {
-                Id = GameManager.Instance.ID
+                Id = GameManager.Instance.PlayerID
             };
             var data = new CreateLobbyRequest
             {
@@ -92,7 +92,7 @@ namespace IO.Net
         {
             var player = new Player
             {
-                Id = GameManager.Instance.ID
+                Id = GameManager.Instance.PlayerID
             };
             var data = new JoinLobbyRequest
             {
@@ -112,7 +112,7 @@ namespace IO.Net
         {
             var player = new Player
             {
-                Id = GameManager.Instance.ID
+                Id = GameManager.Instance.PlayerID
             };
             var data = new LeaveLobbyRequest
             {
@@ -131,7 +131,7 @@ namespace IO.Net
         {
             var player = new Player
             {
-                Id = GameManager.Instance.ID
+                Id = GameManager.Instance.PlayerID
             };
             var data = new LogoutRequest
             {
@@ -146,7 +146,7 @@ namespace IO.Net
         {
             var player = new Player
             {
-                Id = GameManager.Instance.ID
+                Id = GameManager.Instance.PlayerID
             };
             var data = new StartGameRequest
             {

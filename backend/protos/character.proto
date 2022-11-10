@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = ".;protos";
+option csharp_namespace = "Protos";
+
+import "protos/vector3.proto";
+
+enum CharacterType {
+  GHOST = 0;
+  PLAYER = 1;
+}
+
+message Character {
+  CharacterType type = 1;
+  bool dead = 2;
+  Vector3 pos = 3;
+  Vector3 velocity = 4;
+}
+

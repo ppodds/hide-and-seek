@@ -37,7 +37,7 @@ namespace UI
                             inLobby = false;
                             break;
                         case LobbyEvent.Start:
-                            GameManager.Instance.StartGame();
+                            GameManager.Instance.StartGame(result.InitGame, Lobby);
                             inLobby = false;
                             break;
                         default:

@@ -6,7 +6,7 @@ option csharp_namespace = "Protos";
 import "protos/player.proto";
 
 message Game {
-
+  uint32 id = 1;
 }
 
 message ConnectGameRequest {
@@ -20,3 +20,4 @@ message ConnectGameResponse {
 message GameBroadcast {
   Game game = 1;
 }
+
