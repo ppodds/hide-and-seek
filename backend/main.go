@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"github.com/ppodds/hide-and-seek/server"
 	"github.com/ppodds/hide-and-seek/server/tcpproc"
 	"github.com/ppodds/hide-and-seek/server/udpproc"
@@ -23,8 +22,6 @@ func bootstrap() *server.App {
 }
 
 func main() {
-	flag.Parse()
-
 	app := bootstrap()
 	app.Start()
 }

@@ -127,6 +127,8 @@ func (app *App) Start() {
 	procPort := flag.String("tcpproc-port", "23455", "procedure port")
 	gamePort := flag.String("game-port", "23456", "game port")
 
+	flag.Parse()
+
 	tcpServer := startTCPServer(host, procPort)
 	udpServer := startUDPServer(host, gamePort)
 
