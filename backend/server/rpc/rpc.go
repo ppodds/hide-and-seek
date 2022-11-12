@@ -7,35 +7,18 @@ import (
 	"net"
 )
 
-type TCPProcContext struct {
+type RPCContext struct {
 	ProcID        uint8
 	ContentLength uint32
 }
 
-type UDPProcContext struct {
-	ProcID        uint8
-	ContentLength uint32
-	Addr          *net.UDPAddr
-}
-
-func ParseTCPCall(buf []byte) (*TCPProcContext, error) {
+func ParseCall(buf []byte) (*RPCContext, error) {
 	if len(buf) != 5 {
 		return nil, errors.New("wrong size buffer")
 	}
-	ctx := new(TCPProcContext)
+	ctx := new(RPCContext)
 	ctx.ProcID = buf[0]
 	ctx.ContentLength = binary.LittleEndian.Uint32(buf[1:5])
-	return ctx, nil
-}
-
-func ParseUDPCall(buf []byte, addr *net.UDPAddr) (*UDPProcContext, error) {
-	if len(buf) != 5 {
-		return nil, errors.New("wrong size buffer")
-	}
-	ctx := new(UDPProcContext)
-	ctx.ProcID = buf[0]
-	ctx.ContentLength = binary.LittleEndian.Uint32(buf[1:5])
-	ctx.Addr = addr
 	return ctx, nil
 }
 

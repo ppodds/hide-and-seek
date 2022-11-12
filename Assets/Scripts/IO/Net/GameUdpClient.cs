@@ -36,9 +36,9 @@ namespace IO.Net
             var outputStream = new MemoryStream();
             await outputStream.WriteAsync(new[] { procId });
             await outputStream.WriteAsync(BitConverter.GetBytes(data.Length));
+            await outputStream.WriteAsync(data);
             var t = outputStream.ToArray();
             await _udpClient.SendAsync(t, t.Length);
-            await _udpClient.SendAsync(data, data.Length);
         }
 
         private async Task<byte[]> ReadRpcResponse()
