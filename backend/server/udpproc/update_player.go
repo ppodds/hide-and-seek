@@ -25,15 +25,17 @@ func (updatePlayer *UpdatePlayer) Proc(ctx *server.UDPContext) error {
 		return errors.New("invalid player id")
 	}
 	player.SetCharacter(req.Player.Character)
+	playerProto, err2 := player.MarshalProtoBuf()
+	if err2 != nil {
+		return err2
+	}
+	data := &protos.UpdatePlayerBroadcast{
+		Player: playerProto,
+	}
 	// broadcast
 	for _, p := range game.Players() {
-		playerProto, err2 := p.MarshalProtoBuf()
-		if err2 != nil {
-			fmt.Println("skip broadcast to player", p.Player().ID, "because", err2)
+		if p.Player().ID == player.Player().ID {
 			continue
-		}
-		data := &protos.UpdatePlayerBroadcast{
-			Player: playerProto,
 		}
 		err2 = sendRes(ctx, p.Player().UDPAddr(), data)
 		if err2 != nil {

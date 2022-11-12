@@ -163,6 +163,12 @@ public class GameManager : MonoBehaviour
                 var result = await GameUdpClient.WaitPlayerUpdateBroadcast();
                 var player = result.Player;
                 GameState.Players[player.Player.Id].Player = result.Player;
+                var playerObj = GameState.Players[player.Player.Id].PlayerObject;
+                if (!playerObj.IsRemote)
+                    continue;
+                playerObj.SetPosition(result.Player.Character.Pos);
+                playerObj.SetRotation(result.Player.Character.Rotation);
+                playerObj.SetVelocity(result.Player.Character.Velocity);
             }
         }
         catch (ObjectDisposedException e) // player has already leave the lobby

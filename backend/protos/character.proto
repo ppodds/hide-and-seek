@@ -14,6 +14,7 @@ message Character {
   CharacterType type = 1;
   bool dead = 2;
   Vector3 pos = 3;
-  Vector3 velocity = 4;
+  Vector3 rotation = 4;
+  Vector3 velocity = 5;
 }
 

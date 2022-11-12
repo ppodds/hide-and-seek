@@ -39,7 +39,7 @@ func SendTCPRes(conn *net.TCPConn, buf []byte) error {
 }
 
 func SendUDPRes(conn *net.UDPConn, addr *net.UDPAddr, buf []byte) error {
-	fmt.Println("send udp response: ", buf)
+	fmt.Println("send udp response:", buf, "to", addr)
 	_, err := conn.WriteToUDP(buf, addr)
 	if err != nil {
 		return err

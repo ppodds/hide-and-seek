@@ -22,7 +22,9 @@ namespace IO.Net
         {
             if (!IsRemote)
             {
-                var position = _rigidbody.position;
+                var t = transform;
+                var position = t.position;
+                var rotation = t.rotation.eulerAngles;
                 var velocity = _rigidbody.velocity;
                 _udpClient.UpdatePlayer(new Character
                 {
@@ -33,6 +35,12 @@ namespace IO.Net
                         Y = velocity.y,
                         Z = velocity.z
                     },
+                    Rotation = new Vector3
+                    {
+                        X = rotation.x,
+                        Y = rotation.y,
+                        Z = rotation.z
+                    },
                     Pos = new Vector3
                     {
                         X = position.x,
@@ -41,6 +49,21 @@ namespace IO.Net
                     }
                 });
             }
+        }
+
+        public void SetVelocity(Vector3 v)
+        {
+            _rigidbody.velocity = new UnityEngine.Vector3(v.X, v.Y, v.Z);
+        }
+
+        public void SetRotation(Vector3 v)
+        {
+            transform.rotation = Quaternion.Euler(v.X, v.Y, v.Z);
+        }
+
+        public void SetPosition(Vector3 v)
+        {
+            transform.position = new UnityEngine.Vector3(v.X, v.Y, v.Z);
         }
     }
 }
