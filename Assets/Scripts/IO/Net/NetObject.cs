@@ -10,6 +10,7 @@ namespace IO.Net
         private Rigidbody _rigidbody;
         private GameUdpClient _udpClient;
         [field: SerializeField] public bool IsRemote { get; set; }
+        [field: SerializeField] public uint PlayerId { get; set; }
 
         private void Awake()
         {
@@ -48,6 +49,13 @@ namespace IO.Net
                         Z = position.z
                     }
                 });
+            }
+            else
+            {
+                var character = GameManager.Instance.GameState.Players[PlayerId].Player.Character;
+                SetPosition(character.Pos);
+                SetRotation(character.Rotation);
+                SetVelocity(character.Velocity);
             }
         }
 

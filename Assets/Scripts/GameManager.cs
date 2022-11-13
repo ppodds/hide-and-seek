@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using IO.Net;
 using Protos;
@@ -135,6 +136,7 @@ public class GameManager : MonoBehaviour
                 : Instantiate(Resources.Load("Prefabs/Player/Ghost"), PlayersParent);
             var netO = o.GetComponent<NetObject>();
             netO.IsRemote = pair.Key != PlayerID;
+            netO.PlayerId = pair.Key;
             netO.transform.position = new Vector3(pair.Value.Character.Pos.X, pair.Value.Character.Pos.Y,
                 pair.Value.Character.Pos.Z);
             if (pair.Key == PlayerID)
@@ -151,7 +153,8 @@ public class GameManager : MonoBehaviour
             });
         }
 
-        await HandlePlayerMove();
+        var handlePlayerMoveThread = new Thread(() => { HandlePlayerMove(); });
+        handlePlayerMoveThread.Start();
     }
 
     public async Task HandlePlayerMove()
@@ -162,13 +165,9 @@ public class GameManager : MonoBehaviour
             {
                 var result = await GameUdpClient.WaitPlayerUpdateBroadcast();
                 var player = result.Player;
-                GameState.Players[player.Player.Id].Player = result.Player;
-                var playerObj = GameState.Players[player.Player.Id].PlayerObject;
-                if (!playerObj.IsRemote)
+                if (player.Player.Id == PlayerID)
                     continue;
-                playerObj.SetPosition(result.Player.Character.Pos);
-                playerObj.SetRotation(result.Player.Character.Rotation);
-                playerObj.SetVelocity(result.Player.Character.Velocity);
+                GameState.Players[player.Player.Id].Player = result.Player;
             }
         }
         catch (ObjectDisposedException e) // player has already leave the lobby
