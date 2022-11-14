@@ -31,6 +31,7 @@ func NewCharacter() *Character {
 }
 
 func (character *Character) FromProtobuf(v *protos.Character) {
+	character.dead = v.Dead
 	character.pos = ProtobufToVector3(v.Pos)
 	character.rotation = ProtobufToVector3(v.Rotation)
 	character.velocity = ProtobufToVector3(v.Velocity)

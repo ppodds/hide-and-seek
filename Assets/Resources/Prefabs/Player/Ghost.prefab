@@ -15,9 +15,10 @@ GameObject:
   - component: {fileID: 1954831489810052200}
   - component: {fileID: 4987909852285932373}
   - component: {fileID: 6201622141312727346}
+  - component: {fileID: 2402893123658785627}
   m_Layer: 0
   m_Name: Ghost
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -287,6 +288,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsRemote>k__BackingField: 1
+  <PlayerId>k__BackingField: 0
+--- !u!114 &2402893123658785627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3897867437326470263}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c9a166c6ca44f749ad2f3eece89d95b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4367651279255591542
 GameObject:
   m_ObjectHideFlags: 0

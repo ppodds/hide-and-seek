@@ -137,6 +137,7 @@ public class GameManager : MonoBehaviour
             var netO = o.GetComponent<NetObject>();
             netO.IsRemote = pair.Key != PlayerID;
             netO.PlayerId = pair.Key;
+            netO.IsDead = false;
             netO.transform.position = new Vector3(pair.Value.Character.Pos.X, pair.Value.Character.Pos.Y,
                 pair.Value.Character.Pos.Z);
             if (pair.Key == PlayerID)

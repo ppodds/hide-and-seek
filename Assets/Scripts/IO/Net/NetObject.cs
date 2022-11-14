@@ -11,6 +11,7 @@ namespace IO.Net
         private GameUdpClient _udpClient;
         [field: SerializeField] public bool IsRemote { get; set; }
         [field: SerializeField] public uint PlayerId { get; set; }
+        [field: SerializeField] public bool IsDead { get; set; }
 
         private void Awake()
         {
@@ -27,9 +28,9 @@ namespace IO.Net
                 var position = t.position;
                 var rotation = t.rotation.eulerAngles;
                 var velocity = _rigidbody.velocity;
-                _udpClient.UpdatePlayer(new Character
+                var task = _udpClient.UpdatePlayer(new Character
                 {
-                    Dead = false,
+                    Dead = IsDead,
                     Velocity = new Vector3
                     {
                         X = velocity.x,
@@ -49,10 +50,22 @@ namespace IO.Net
                         Z = position.z
                     }
                 });
+                task.GetAwaiter().OnCompleted(() =>
+                {
+                    if (IsDead)
+                        Destroy(gameObject);
+                });
             }
             else
             {
                 var character = GameManager.Instance.GameState.Players[PlayerId].Player.Character;
+                IsDead = character.Dead;
+                if (IsDead)
+                {
+                    Destroy(gameObject);
+                    return;
+                }
+
                 SetPosition(character.Pos);
                 SetRotation(character.Rotation);
                 SetVelocity(character.Velocity);

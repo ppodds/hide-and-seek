@@ -1,6 +1,10 @@
-﻿namespace Entity
+﻿using IO.Net;
+using UnityEngine;
+
+namespace Entity
 {
-    public class Ghost
+    [RequireComponent(typeof(NetObject))]
+    public class Ghost : MonoBehaviour
     {
     }
 }
