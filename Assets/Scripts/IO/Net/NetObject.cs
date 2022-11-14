@@ -22,6 +22,8 @@ namespace IO.Net
 
         private void Update()
         {
+            if (GameManager.Instance.GameState == null)
+                return;
             if (!IsRemote)
             {
                 var t = transform;
