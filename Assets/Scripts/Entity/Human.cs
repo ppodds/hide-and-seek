@@ -28,6 +28,12 @@ namespace Entity
 
         private void Update()
         {
+            if (transform.position.y < -300)
+            {
+                GenerateSpectatorCamera();
+                return;
+            }
+
             if (_rigidbody.velocity.magnitude > 0.1)
             {
                 _animator.SetFloat(Velocity, _rigidbody.velocity.magnitude);
@@ -46,6 +52,17 @@ namespace Entity
         {
             if (_netObject.IsRemote)
                 return;
+            if (GenerateSpectatorCamera()) return;
+            if (collision.gameObject.GetComponent<Ghost>() == null)
+                return;
+            var dir = (transform.position - collision.transform.position).normalized;
+            _rigidbody.AddForce(new Vector3(dir.x, 0, dir.z) * 1500 + Vector3.up * 1000);
+            _superCharacterAio.enableMovementControl = false;
+            _isDead = true;
+        }
+
+        private bool GenerateSpectatorCamera()
+        {
             if (_isDead && !_cameraGenerated)
             {
                 _cameraGenerated = true;
@@ -53,15 +70,10 @@ namespace Entity
                 Instantiate(Resources.Load("Prefabs/Camera"), t.position,
                     t.rotation);
                 _netObject.IsDead = true;
-                return;
+                return true;
             }
 
-            if (collision.gameObject.GetComponent<Ghost>() == null)
-                return;
-            var dir = (transform.position - collision.transform.position).normalized;
-            _rigidbody.AddForce(new Vector3(dir.x, 0, dir.z) * 1500 + Vector3.up * 1000);
-            _superCharacterAio.enableMovementControl = false;
-            _isDead = true;
+            return false;
         }
     }
 }
