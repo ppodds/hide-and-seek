@@ -22,12 +22,12 @@ namespace UI
             {
                 if (!task.Result)
                 {
-                    Debug.Log("Login Failed, Please retry!");
+                    GameManager.Instance.toast.PushToast("Login Failed, Please retry!");
                     return;
                 }
 
                 gameObject.SetActive(false);
-                Debug.Log("Login Success");
+                GameManager.Instance.toast.PushToast("Login Success");
             });
         }
     }

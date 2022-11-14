@@ -289,6 +289,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <IsRemote>k__BackingField: 1
   <PlayerId>k__BackingField: 0
+  <IsDead>k__BackingField: 0
 --- !u!114 &2402893123658785627
 MonoBehaviour:
   m_ObjectHideFlags: 0

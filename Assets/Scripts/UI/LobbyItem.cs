@@ -23,7 +23,7 @@ namespace UI
             var lobby = await GameManager.Instance.GameTcpClient.JoinLobby(Lobby);
             if (lobby == null)
             {
-                Debug.Log("Join failed");
+                GameManager.Instance.toast.PushToast("Join failed");
                 return;
             }
 

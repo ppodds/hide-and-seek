@@ -35,7 +35,7 @@ namespace UI
                             GameManager.Instance.DisconnectUdp();
                             lobbyList.SetActive(true);
                             gameObject.SetActive(false);
-                            Debug.Log("Leave lobby success");
+                            GameManager.Instance.toast.PushToast("Leave lobby success");
                             inLobby = false;
                             break;
                         case LobbyEvent.Start:
@@ -85,7 +85,7 @@ namespace UI
                 _trying = false;
                 lobbyList.SetActive(true);
                 gameObject.SetActive(false);
-                Debug.Log("Leave lobby success");
+                GameManager.Instance.toast.PushToast("Leave lobby success");
             });
         }
 
@@ -95,7 +95,7 @@ namespace UI
             task.GetAwaiter().OnCompleted(() =>
             {
                 if (!task.Result)
-                    Debug.Log("Start game failed");
+                    GameManager.Instance.toast.PushToast("Start game failed");
             });
         }
     }

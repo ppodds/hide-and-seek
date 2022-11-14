@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Protos;
 
 [Serializable]
 public class GameState
 {
+    public CharacterType Winner;
     public readonly uint Id;
     public readonly Dictionary<uint, PlayerState> Players;
 

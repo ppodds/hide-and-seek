@@ -24,7 +24,7 @@ namespace UI
                     t.UpdateText();
                 }
 
-                Debug.Log("Load lobbies success");
+                GameManager.Instance.toast.PushToast("Load lobbies success");
             });
         }
 
@@ -38,7 +38,7 @@ namespace UI
             var lobby = await GameManager.Instance.GameTcpClient.CreateLobby();
             if (lobby == null)
             {
-                Debug.Log("Create lobby failed");
+                GameManager.Instance.toast.PushToast("Create lobby failed");
                 return;
             }
 

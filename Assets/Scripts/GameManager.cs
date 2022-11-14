@@ -6,6 +6,7 @@ using IO.Net;
 using Protos;
 using SUPERCharacter;
 using UI;
+using UI.Toast;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -22,8 +23,10 @@ public class GameManager : MonoBehaviour
 {
     public LobbyPanel lobbyPanel;
     [SerializeField] private GameObject menuUI;
+    [SerializeField] private GameObject gameUI;
+    public Toast toast;
 
-    public Transform PlayersParent;
+    public Transform playersParent;
 
     private Lobby _lobby;
     public uint PlayerID { get; private set; }
@@ -56,21 +59,27 @@ public class GameManager : MonoBehaviour
             return;
         if (!GameState.InGame)
         {
+            var winner = GameState.Winner;
             GameState = null;
             // clean up gameobject
             DisconnectUdp();
-            SceneManager.LoadScene("Welcome");
-            for (var i = 0; i < PlayersParent.childCount; i++)
+            toast.PushToast(winner + " Win!");
+            Task.Delay(new TimeSpan(0, 0, 0, 10)).GetAwaiter().OnCompleted(() =>
             {
-                var child = PlayersParent.GetChild(i);
-                Destroy(child.gameObject);
-            }
+                SceneManager.LoadScene("Welcome");
+                for (var i = 0; i < playersParent.childCount; i++)
+                {
+                    var child = playersParent.GetChild(i);
+                    Destroy(child.gameObject);
+                }
 
-            ConnectToLobby(_lobby).GetAwaiter().OnCompleted(() =>
-            {
-                menuUI.SetActive(true);
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
+                ConnectToLobby(_lobby).GetAwaiter().OnCompleted(() =>
+                {
+                    gameUI.SetActive(false);
+                    menuUI.SetActive(true);
+                    Cursor.visible = true;
+                    Cursor.lockState = CursorLockMode.None;
+                });
             });
         }
     }
@@ -105,12 +114,12 @@ public class GameManager : MonoBehaviour
         var result = await GameUdpClient.ConnectLobby();
         if (!result.Success)
         {
-            Debug.Log("Connect to lobby failed");
+            toast.PushToast("Connect to lobby failed");
             return false;
         }
 
         _lobby = lobby;
-        Debug.Log("Join lobby success");
+        toast.PushToast("Join lobby success");
         return true;
     }
 
@@ -141,12 +150,12 @@ public class GameManager : MonoBehaviour
         var result = await GameUdpClient.ConnectGame();
         if (!result.Success)
         {
-            Debug.Log("Connect to game failed");
+            toast.PushToast("Connect to game failed");
             return false;
         }
 
         SceneManager.LoadScene("Demo");
-        Debug.Log("Join game success");
+        toast.PushToast("Join game success");
         return true;
     }
 
@@ -155,12 +164,13 @@ public class GameManager : MonoBehaviour
         DisconnectUdp();
         await ConnectToGame();
         menuUI.SetActive(false);
+        gameUI.SetActive(true);
         GameState = new GameState(initGame.Game.Id);
         foreach (var pair in initGame.Players)
         {
             var o = pair.Value.Character.Type == CharacterType.Player
-                ? Instantiate(Resources.Load("Prefabs/Player/Human"), PlayersParent)
-                : Instantiate(Resources.Load("Prefabs/Player/Ghost"), PlayersParent);
+                ? Instantiate(Resources.Load("Prefabs/Player/Human"), playersParent)
+                : Instantiate(Resources.Load("Prefabs/Player/Ghost"), playersParent);
             var netO = o.GetComponent<NetObject>();
             netO.IsRemote = pair.Key != PlayerID;
             netO.PlayerId = pair.Key;
@@ -201,6 +211,7 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
+                    GameState.Winner = result.Winner;
                     GameState.InGame = false;
                     break;
                 }

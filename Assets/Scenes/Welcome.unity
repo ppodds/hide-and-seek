@@ -14222,5 +14222,25 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameManager
       objectReference: {fileID: 0}
+    - target: {fileID: 8847126802357126494, guid: bdec5e7ccb4ee924e9efa906b3a4dd3b,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8847126802357126494, guid: bdec5e7ccb4ee924e9efa906b3a4dd3b,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8847126802357126494, guid: bdec5e7ccb4ee924e9efa906b3a4dd3b,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8847126802357126494, guid: bdec5e7ccb4ee924e9efa906b3a4dd3b,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bdec5e7ccb4ee924e9efa906b3a4dd3b, type: 3}
