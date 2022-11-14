@@ -4,7 +4,7 @@ option go_package = ".;protos";
 option csharp_namespace = "Protos";
 
 import "protos/player.proto";
-import "protos/game_player.proto";
+import "protos/game.proto";
 
 message Lobby {
   uint32 id = 1;

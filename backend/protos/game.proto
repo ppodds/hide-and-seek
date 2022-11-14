@@ -4,6 +4,8 @@ option go_package = ".;protos";
 option csharp_namespace = "Protos";
 
 import "protos/player.proto";
+import "protos/game_player.proto";
+import "protos/character.proto";
 
 message Game {
   uint32 id = 1;
@@ -17,7 +19,23 @@ message ConnectGameResponse {
   bool success = 1;
 }
 
-message GameBroadcast {
-  Game game = 1;
+enum GameEvent {
+  UPDATE_PLAYER = 0;
+  GAME_OVER = 1;
 }
 
+message GameBroadcast {
+  GameEvent event = 1;
+  optional GamePlayer player = 2;
+  optional CharacterType winner = 3;
+}
+
+message UpdatePlayerRequest {
+  Game game = 1;
+  GamePlayer player = 2;
+}
+
+message InitGame {
+  Game game = 1;
+  map<uint32, GamePlayer> players = 2;
+}

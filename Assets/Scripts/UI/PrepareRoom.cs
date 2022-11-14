@@ -16,6 +16,8 @@ namespace UI
 
         private async void OnEnable()
         {
+            if (Lobby != null)
+                UpdatePrepareRoom();
             try
             {
                 var inLobby = true;

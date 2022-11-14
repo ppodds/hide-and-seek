@@ -20,10 +20,12 @@ public struct Server
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private LobbyPanel lobbyPanel;
+    public LobbyPanel lobbyPanel;
     [SerializeField] private GameObject menuUI;
 
     public Transform PlayersParent;
+
+    private Lobby _lobby;
     public uint PlayerID { get; private set; }
 
     public GameState GameState { get; private set; }
@@ -46,6 +48,31 @@ public class GameManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void Update()
+    {
+        if (GameState == null)
+            return;
+        if (!GameState.InGame)
+        {
+            GameState = null;
+            // clean up gameobject
+            DisconnectUdp();
+            SceneManager.LoadScene("Welcome");
+            for (var i = 0; i < PlayersParent.childCount; i++)
+            {
+                var child = PlayersParent.GetChild(i);
+                Destroy(child.gameObject);
+            }
+
+            ConnectToLobby(_lobby).GetAwaiter().OnCompleted(() =>
+            {
+                menuUI.SetActive(true);
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            });
+        }
     }
 
     public async Task<bool> ConnectToServer()
@@ -82,7 +109,7 @@ public class GameManager : MonoBehaviour
             return false;
         }
 
-        lobbyPanel.ShowPrepareRoom(lobby);
+        _lobby = lobby;
         Debug.Log("Join lobby success");
         return true;
     }
@@ -154,21 +181,29 @@ public class GameManager : MonoBehaviour
             });
         }
 
-        var handlePlayerMoveThread = new Thread(() => { HandlePlayerMove(); });
-        handlePlayerMoveThread.Start();
+        var handleBroadcastThread = new Thread(() => { HandleBroadcast(); });
+        handleBroadcastThread.Start();
     }
 
-    public async Task HandlePlayerMove()
+    public async Task HandleBroadcast()
     {
         try
         {
             while (true)
             {
                 var result = await GameUdpClient.WaitPlayerUpdateBroadcast();
-                var player = result.Player;
-                if (player.Player.Id == PlayerID)
-                    continue;
-                GameState.Players[player.Player.Id].Player = result.Player;
+                if (result.Event == GameEvent.UpdatePlayer)
+                {
+                    var player = result.Player;
+                    if (player.Player.Id == PlayerID)
+                        continue;
+                    GameState.Players[player.Player.Id].Player = result.Player;
+                }
+                else
+                {
+                    GameState.InGame = false;
+                    break;
+                }
             }
         }
         catch (ObjectDisposedException e) // player has already leave the lobby

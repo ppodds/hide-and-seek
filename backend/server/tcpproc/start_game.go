@@ -29,7 +29,7 @@ func (startGame *StartGame) Proc(ctx *server.TCPContext) error {
 		return errors.New("game is already started")
 	}
 	lobby.SetInGame(true)
-	game := ctx.App.Games.CreateGame(lobby.Players())
+	game := ctx.App.Games.CreateGame(lobby.ID, lobby.Players())
 	players := make(map[uint32]*protos.GamePlayer)
 	for _, p := range game.Players() {
 		player, err2 := p.Player().MarshalProtoBuf()

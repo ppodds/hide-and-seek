@@ -11,5 +11,8 @@ public class GameState
     {
         Id = id;
         Players = new Dictionary<uint, PlayerState>();
+        InGame = true;
     }
+
+    public bool InGame { get; set; }
 }

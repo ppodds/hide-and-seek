@@ -27,7 +27,8 @@ namespace UI
                 return;
             }
 
-            await GameManager.Instance.ConnectToLobby(lobby);
+            if (await GameManager.Instance.ConnectToLobby(lobby))
+                GameManager.Instance.lobbyPanel.ShowPrepareRoom(lobby);
         }
 
         public void JoinRoom()

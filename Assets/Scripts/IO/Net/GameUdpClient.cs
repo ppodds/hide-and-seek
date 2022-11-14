@@ -121,10 +121,10 @@ namespace IO.Net
             await RpcCall(2, outputStream.ToArray());
         }
 
-        public async Task<UpdatePlayerBroadcast> WaitPlayerUpdateBroadcast(CancellationToken token = default)
+        public async Task<GameBroadcast> WaitPlayerUpdateBroadcast(CancellationToken token = default)
         {
             var res = await ReadBroadcast(token);
-            return UpdatePlayerBroadcast.Parser.ParseFrom(res);
+            return GameBroadcast.Parser.ParseFrom(res);
         }
     }
 }

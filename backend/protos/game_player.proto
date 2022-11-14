@@ -3,25 +3,10 @@ syntax = "proto3";
 option go_package = ".;protos";
 option csharp_namespace = "Protos";
 
-import "protos/game.proto";
 import "protos/player.proto";
 import "protos/character.proto";
 
 message GamePlayer {
   Player player = 1;
   Character character = 2;
-}
-
-message UpdatePlayerRequest {
-  Game game = 1;
-  GamePlayer player = 2;
-}
-
-message UpdatePlayerBroadcast {
-  GamePlayer player = 1;
-}
-
-message InitGame {
-  Game game = 1;
-  map<uint32, GamePlayer> players = 2;
 }

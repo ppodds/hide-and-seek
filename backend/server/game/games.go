@@ -20,7 +20,7 @@ func NewGames() *Games {
 	return games
 }
 
-func (games *Games) CreateGame(players []*player.Player) *Game {
+func (games *Games) CreateGame(lobbyID uint32, players []*player.Player) *Game {
 	mapPlayers := make(map[uint32]*Player)
 	s := rand.NewSource(time.Now().Unix())
 	r := rand.New(s)
@@ -36,7 +36,7 @@ func (games *Games) CreateGame(players []*player.Player) *Game {
 	}
 	games.Lock()
 	defer games.Unlock()
-	game := NewGame(games.curID, mapPlayers, ghost)
+	game := NewGame(games.curID, lobbyID, mapPlayers, ghost)
 	games.games[games.curID] = game
 	games.curID++
 	return game
@@ -46,4 +46,15 @@ func (games *Games) Games() map[uint32]*Game {
 	games.RLock()
 	defer games.RUnlock()
 	return games.games
+}
+
+func (games *Games) RmGame(id uint32) bool {
+	games.Lock()
+	_, ok := games.games[id]
+	if !ok {
+		return false
+	}
+	delete(games.games, id)
+	games.Unlock()
+	return true
 }

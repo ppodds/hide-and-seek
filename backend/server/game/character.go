@@ -62,3 +62,9 @@ func (character *Character) MarshalProtoBuf() (*protos.Character, error) {
 		Velocity: velocity,
 	}, nil
 }
+
+func (character *Character) Dead() bool {
+	character.RLock()
+	defer character.RUnlock()
+	return character.dead
+}
