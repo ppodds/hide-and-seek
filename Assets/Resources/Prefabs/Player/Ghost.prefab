@@ -32,7 +32,7 @@ Transform:
   m_GameObject: {fileID: 3897867437326470263}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4, y: 4, z: 4}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2592958377228793375}
@@ -160,8 +160,8 @@ MonoBehaviour:
   bodyCatchupSpeed: 2.5
   inputResponseFiltering: 2.5
   enableMovementControl: 1
-  walkingSpeed: 140
-  sprintingSpeed: 260
+  walkingSpeed: 240
+  sprintingSpeed: 340
   crouchingSpeed: 45
   decelerationSpeed: 240
   sprintKey_L: 304
@@ -221,7 +221,7 @@ MonoBehaviour:
     groundMaterial: {fileID: 0}
     groundLayer: {fileID: 0}
     groundPhysicMaterial: {fileID: 0}
-  enableStaminaSystem: 1
+  enableStaminaSystem: 0
   jumpingDepletesStamina: 1
   Stamina: 50
   currentStaminaLevel: 0
