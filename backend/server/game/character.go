@@ -68,3 +68,9 @@ func (character *Character) Dead() bool {
 	defer character.RUnlock()
 	return character.dead
 }
+
+func (character *Character) SetPos(v *Vector3) {
+	character.Lock()
+	defer character.Unlock()
+	character.pos = v
+}

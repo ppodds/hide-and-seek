@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"github.com/ppodds/hide-and-seek/protos"
 	"github.com/ppodds/hide-and-seek/server"
+	game2 "github.com/ppodds/hide-and-seek/server/game"
 	"github.com/ppodds/hide-and-seek/server/rpc"
 	"google.golang.org/protobuf/proto"
+	"math/rand"
+	"time"
 )
 
 type StartGame struct {
@@ -30,6 +33,24 @@ func (startGame *StartGame) Proc(ctx *server.TCPContext) error {
 	}
 	lobby.SetInGame(true)
 	game := ctx.App.Games.CreateGame(lobby.ID, lobby.Players())
+	// set player position
+	pos := []*game2.Vector3{
+		{X: 55.87, Y: 21.84, Z: 29.19},
+		{X: 57.41, Y: 21.88, Z: 68.1},
+		{X: 81.4, Y: 21.94, Z: 75.4},
+	}
+	for _, p := range game.Players() {
+		if game.Ghost().Player().ID == p.Player().ID {
+			p.Character().SetPos(&game2.Vector3{X: 67.34, Y: 23.89, Z: 44})
+		} else {
+			s := rand.NewSource(time.Now().Unix())
+			r := rand.New(s)
+			picked := r.Intn(len(pos))
+			p.Character().SetPos(pos[picked])
+			pos[picked] = pos[len(pos)-1]
+			pos = pos[:len(pos)-1]
+		}
+	}
 	players := make(map[uint32]*protos.GamePlayer)
 	for _, p := range game.Players() {
 		player, err2 := p.Player().MarshalProtoBuf()
