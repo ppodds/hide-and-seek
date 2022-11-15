@@ -22,8 +22,6 @@ namespace IO.Net
 
         private void Update()
         {
-            if (GameManager.Instance.GameState == null)
-                return;
             if (!IsRemote)
             {
                 var t = transform;
@@ -60,6 +58,12 @@ namespace IO.Net
             }
             else
             {
+                if (GameManager.Instance.GameState == null)
+                {
+                    Destroy(gameObject);
+                    return;
+                }
+
                 var character = GameManager.Instance.GameState.Players[PlayerId].Player.Character;
                 IsDead = character.Dead;
                 if (IsDead)
