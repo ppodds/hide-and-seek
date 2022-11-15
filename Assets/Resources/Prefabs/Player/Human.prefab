@@ -247,6 +247,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <IsRemote>k__BackingField: 1
   <PlayerId>k__BackingField: 0
+  <IsDead>k__BackingField: 0
 --- !u!114 &6906215529220545195
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -299,7 +300,7 @@ MonoBehaviour:
   isSprinting: 0
   toggleSprint: 0
   sprintOverride: 0
-  canCrouch: 1
+  canCrouch: 0
   isCrouching: 0
   toggleCrouch: 0
   crouchOverride: 0
@@ -310,7 +311,7 @@ MonoBehaviour:
   currentGroundMovementSpeed: 1
   whatIsGround:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2147483647
   hardSlopeLimit: 70
   slopeInfluenceOnSpeed: 1
   maxStairRise: 0.25
@@ -320,12 +321,12 @@ MonoBehaviour:
   jumpEnhancements: 1
   Jumped: 0
   jumpKey_L: 32
-  jumpPower: 40
-  airControlFactor: 1
+  jumpPower: 60
+  airControlFactor: 0
   decentMultiplier: 2.5
   tapJumpMultiplier: 2.1
   isSliding: 0
-  canSlide: 1
+  canSlide: 0
   slidingDeceleration: 150
   slidingTransitionSpeed: 4
   maxFlatSlideDistance: 10
@@ -383,7 +384,7 @@ MonoBehaviour:
     hasLowHealth: 0
     isStarving: 0
     isDehydrated: 0
-  interactKey_L: 101
+  interactKey_L: 0
   interactRange: 4
   interactableLayer:
     serializedVersion: 2

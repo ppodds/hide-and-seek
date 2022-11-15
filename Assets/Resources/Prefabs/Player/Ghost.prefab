@@ -171,7 +171,7 @@ MonoBehaviour:
   isSprinting: 0
   toggleSprint: 0
   sprintOverride: 0
-  canCrouch: 1
+  canCrouch: 0
   isCrouching: 0
   toggleCrouch: 0
   crouchOverride: 0
@@ -182,12 +182,12 @@ MonoBehaviour:
   currentGroundMovementSpeed: 1
   whatIsGround:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2147483647
   hardSlopeLimit: 70
   slopeInfluenceOnSpeed: 1
   maxStairRise: 0.25
   stepUpSpeed: 0.2
-  canJump: 1
+  canJump: 0
   holdJump: 0
   jumpEnhancements: 1
   Jumped: 0
@@ -197,7 +197,7 @@ MonoBehaviour:
   decentMultiplier: 2.5
   tapJumpMultiplier: 2.1
   isSliding: 0
-  canSlide: 1
+  canSlide: 0
   slidingDeceleration: 150
   slidingTransitionSpeed: 4
   maxFlatSlideDistance: 10
