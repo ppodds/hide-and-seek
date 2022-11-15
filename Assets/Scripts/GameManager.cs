@@ -22,6 +22,7 @@ public struct Server
 public class GameManager : MonoBehaviour
 {
     public LobbyPanel lobbyPanel;
+    public PrepareRoom prepareRoom;
     [SerializeField] private GameObject menuUI;
     [SerializeField] private GameObject gameUI;
     public Toast toast;
@@ -73,8 +74,16 @@ public class GameManager : MonoBehaviour
                     Destroy(child.gameObject);
                 }
 
-                ConnectToLobby(_lobby).GetAwaiter().OnCompleted(() =>
+                var task = ConnectToLobby(_lobby);
+                task.GetAwaiter().OnCompleted(() =>
                 {
+                    if (!task.Result)
+                    {
+                        prepareRoom.gameObject.SetActive(false);
+                        lobbyPanel.gameObject.SetActive(true);
+                        GameTcpClient.LeaveLobby(_lobby);
+                    }
+
                     gameUI.SetActive(false);
                     menuUI.SetActive(true);
                     Cursor.visible = true;
