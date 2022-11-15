@@ -35,43 +35,38 @@ func NewApp() *App {
 }
 
 func (app *App) HandleTcpProc(conn *net.TCPConn) {
-	for {
-		buf := make([]byte, 5)
+	buf := make([]byte, 5)
+	_, err := conn.Read(buf)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	ctx, err := rpc.ParseCall(buf)
+	if err != nil {
+		fmt.Printf("unsupport protocal. error: %s\n", err.Error())
+		return
+	}
+	if ctx.ContentLength != 0 {
+		buf = make([]byte, ctx.ContentLength)
 		_, err := conn.Read(buf)
 		if err != nil {
-			if err.Error() == "EOF" {
-				continue
-			}
-			fmt.Println("failed to read TCP msg because of", err.Error())
+			fmt.Println(err)
 			return
 		}
-		ctx, err := rpc.ParseCall(buf)
+	} else {
+		buf = nil
+	}
+	if !(ctx.ProcID < app.tcpProcNum) {
+		return
+	}
+	tcpCtx := TCPContext{app, conn, buf}
+	fmt.Println("Invoke TCP Proc", ctx.ProcID)
+	err = app.tcpProcs[ctx.ProcID].Proc(&tcpCtx)
+	if err != nil {
+		err := app.tcpProcs[ctx.ProcID].ErrorHandler(err, &tcpCtx)
 		if err != nil {
-			fmt.Printf("unsupport protocal. error: %s\n", err.Error())
+			fmt.Println(err)
 			return
-		}
-		if ctx.ContentLength != 0 {
-			buf = make([]byte, ctx.ContentLength)
-			_, err := conn.Read(buf)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-		} else {
-			buf = nil
-		}
-		if !(ctx.ProcID < app.tcpProcNum) {
-			return
-		}
-		tcpCtx := TCPContext{app, conn, buf}
-		fmt.Println("Invoke TCP Proc", ctx.ProcID)
-		err = app.tcpProcs[ctx.ProcID].Proc(&tcpCtx)
-		if err != nil {
-			err := app.tcpProcs[ctx.ProcID].ErrorHandler(err, &tcpCtx)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
 		}
 	}
 }

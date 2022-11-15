@@ -13,23 +13,33 @@ namespace IO.Net
     {
         private readonly string _host;
         private readonly int _port;
-        private readonly TcpClient _tcpClient;
 
         public GameTcpClient(string host, int port)
         {
-            _tcpClient = new TcpClient();
             _host = host;
             _port = port;
         }
 
-        private async Task RpcCall(byte procId)
+        private async Task<byte[]> Rpc(byte procId, bool readResponse = true)
         {
-            await RpcCall(procId, Array.Empty<byte>());
+            return await Rpc(procId, Array.Empty<byte>(), readResponse);
         }
 
-        private async Task RpcCall(byte procId, byte[] data)
+        private async Task<byte[]> Rpc(byte procId, byte[] data, bool readResponse = true,
+            CancellationToken token = default)
         {
-            var stream = _tcpClient.GetStream();
+            var client = new TcpClient();
+            await client.ConnectAsync(_host, _port);
+            await RpcCall(client, procId, data);
+            var result = readResponse ? await ReadRpcResponse(client, token) : null;
+            client.Close();
+            client.Dispose();
+            return result;
+        }
+
+        private static async Task RpcCall(TcpClient client, byte procId, byte[] data)
+        {
+            var stream = client.GetStream();
             var outputStream = new MemoryStream();
             await outputStream.WriteAsync(new[] { procId });
             await outputStream.WriteAsync(BitConverter.GetBytes(data.Length));
@@ -37,9 +47,9 @@ namespace IO.Net
             await stream.WriteAsync(outputStream.ToArray());
         }
 
-        private async Task<byte[]> ReadRpcResponse(CancellationToken token = default)
+        private static async Task<byte[]> ReadRpcResponse(TcpClient client, CancellationToken token = default)
         {
-            var stream = _tcpClient.GetStream();
+            var stream = client.GetStream();
             var buf = new byte[4];
             var n = await stream.ReadAsync(buf, token);
             token.ThrowIfCancellationRequested();
@@ -58,16 +68,12 @@ namespace IO.Net
 
         public async Task<Player> Login()
         {
-            await _tcpClient.ConnectAsync(_host, _port);
-            await RpcCall(0);
-            var data = await ReadRpcResponse();
-            return Player.Parser.ParseFrom(data);
+            return Player.Parser.ParseFrom(await Rpc(0));
         }
 
         public async Task<Lobbies> GetLobbies()
         {
-            await RpcCall(1);
-            var buf = await ReadRpcResponse();
+            var buf = await Rpc(1);
             return buf == null ? null : Lobbies.Parser.ParseFrom(buf);
         }
 
@@ -83,8 +89,7 @@ namespace IO.Net
             };
             var outputStream = new MemoryStream();
             data.WriteTo(outputStream);
-            await RpcCall(2, outputStream.ToArray());
-            var buf = await ReadRpcResponse();
+            var buf = await Rpc(2, outputStream.ToArray());
             return CreateLobbyResponse.Parser.ParseFrom(buf).Lobby;
         }
 
@@ -101,8 +106,7 @@ namespace IO.Net
             };
             var outputStream = new MemoryStream();
             data.WriteTo(outputStream);
-            await RpcCall(3, outputStream.ToArray());
-            var buf = await ReadRpcResponse();
+            var buf = await Rpc(3, outputStream.ToArray());
             var res = JoinLobbyResponse.Parser.ParseFrom(buf);
             if (!res.Success) Debug.Log("Unable to join the lobby");
             return res.Lobby;
@@ -121,8 +125,7 @@ namespace IO.Net
             };
             var outputStream = new MemoryStream();
             data.WriteTo(outputStream);
-            await RpcCall(4, outputStream.ToArray());
-            var buf = await ReadRpcResponse();
+            var buf = await Rpc(4, outputStream.ToArray());
             var res = LeaveLobbyResponse.Parser.ParseFrom(buf);
             if (!res.Success) Debug.Log("Unable to leave the lobby");
         }
@@ -139,7 +142,7 @@ namespace IO.Net
             };
             var outputStream = new MemoryStream();
             data.WriteTo(outputStream);
-            await RpcCall(5, outputStream.ToArray());
+            await Rpc(5, outputStream.ToArray(), false);
         }
 
         public async Task<bool> StartGame(Lobby lobby)
@@ -155,8 +158,7 @@ namespace IO.Net
             };
             var outputStream = new MemoryStream();
             data.WriteTo(outputStream);
-            await RpcCall(6, outputStream.ToArray());
-            var result = await ReadRpcResponse();
+            var result = await Rpc(6, outputStream.ToArray());
             return StartGameResponse.Parser.ParseFrom(result).Success;
         }
     }
